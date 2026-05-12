@@ -27,7 +27,7 @@ export default async function ResidentLoginPage() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          Don&apos;t have an account? Visit your barangay hall to register.
+          Don&apos;t have an account? Visit your barangay hall to register. Test
         </p>
       </div>
     </main>
