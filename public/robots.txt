@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /auth/admin
+Disallow: /api/
+Allow: /auth/resident-login
+Allow: /resident/

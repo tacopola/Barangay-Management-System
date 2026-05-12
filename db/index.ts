@@ -1,0 +1,11 @@
+import { drizzle } from "drizzle-orm/postgres-js"
+import postgres from "postgres"
+import * as schema from "./schema"
+
+// Standard client — RLS applies
+const client = postgres(process.env.DATABASE_URL!, { prepare: false })
+export const db = drizzle(client, { schema })
+
+// Service role client — bypasses RLS (use only in trusted server actions)
+const adminClient = postgres(process.env.DATABASE_URL_SERVICE_ROLE!, { prepare: false })
+export const adminDb = drizzle(adminClient, { schema })
