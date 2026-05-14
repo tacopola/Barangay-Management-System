@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Bell, Building } from "lucide-react";
 import type { AuthUser } from "@/lib/auth";
-import { LogoutButton } from "../auth/logout-resident-button";
 export function ResidentTopBar({ user }: { user: AuthUser }) {
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b px-5 py-3.5 flex items-center justify-between shrink-0">
@@ -15,7 +14,6 @@ export function ResidentTopBar({ user }: { user: AuthUser }) {
           Barangay Portal
         </span>
       </div>
-      <LogoutButton />
 
       <Link
         href="/resident/notifications"

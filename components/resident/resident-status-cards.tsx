@@ -1,5 +1,4 @@
 import Link from "next/link"
-//import { Badge } from "@/components/ui/badge"
 import { ArrowRight } from "lucide-react"
 
 type DocRequest = {
@@ -24,15 +23,28 @@ const docTypeLabel: Record<string, string> = {
   good_moral_certificate: "Good Moral Certificate",
 }
 
-const statusColor: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-700 border-amber-200",
-  approved: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
-  rejected: "bg-red-500/10 text-red-700 border-red-200",
-  released: "bg-blue-500/10 text-blue-700 border-blue-200",
-  filed: "bg-amber-500/10 text-amber-700 border-amber-200",
-  under_mediation: "bg-blue-500/10 text-blue-700 border-blue-200",
-  settled: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
-  escalated: "bg-red-500/10 text-red-700 border-red-200",
+const statusStyle: Record<string, string> = {
+  pending:        "bg-amber-50 text-amber-700 border-amber-200",
+  approved:       "bg-emerald-50 text-emerald-700 border-emerald-200",
+  rejected:       "bg-red-50 text-red-700 border-red-200",
+  released:       "bg-blue-50 text-blue-700 border-blue-200",
+  filed:          "bg-amber-50 text-amber-700 border-amber-200",
+  under_mediation:"bg-blue-50 text-blue-700 border-blue-200",
+  settled:        "bg-emerald-50 text-emerald-700 border-emerald-200",
+  escalated:      "bg-red-50 text-red-700 border-red-200",
+  dismissed:      "bg-muted text-muted-foreground border-border",
+}
+
+const statusLabel: Record<string, string> = {
+  pending:        "Pending",
+  approved:       "Approved",
+  rejected:       "Rejected",
+  released:       "Released",
+  filed:          "Filed",
+  under_mediation:"Mediation",
+  settled:        "Settled",
+  escalated:      "Escalated",
+  dismissed:      "Dismissed",
 }
 
 export function ResidentStatusCards({
@@ -45,8 +57,13 @@ export function ResidentStatusCards({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold">My Requests</h2>
-        <Link href="/resident/documents" className="text-xs text-primary flex items-center gap-1">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          My Requests
+        </p>
+        <Link
+          href="/resident/documents"
+          className="flex items-center gap-1 text-xs text-primary font-medium"
+        >
           See all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
@@ -55,11 +72,11 @@ export function ResidentStatusCards({
         {docs.map((doc) => (
           <Link
             key={doc.id}
-            href={`/resident/documents`}
-            className="flex items-center justify-between p-4 rounded-2xl border bg-card active:scale-[0.98] transition-transform"
+            href="/resident/documents"
+            className="flex items-center justify-between p-4 rounded-2xl border bg-card shadow-sm hover:bg-muted/20 active:scale-[0.98] transition-all duration-150"
           >
-            <div>
-              <p className="text-sm font-medium">
+            <div className="min-w-0 mr-3">
+              <p className="text-sm font-semibold truncate">
                 {docTypeLabel[doc.docType] ?? doc.docType}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -70,8 +87,8 @@ export function ResidentStatusCards({
                 })}
               </p>
             </div>
-            <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border capitalize ${statusColor[doc.status] ?? ""}`}>
-              {doc.status}
+            <span className={`shrink-0 text-[10px] font-semibold px-3 py-1.5 rounded-full border ${statusStyle[doc.status] ?? "bg-muted text-muted-foreground"}`}>
+              {statusLabel[doc.status] ?? doc.status}
             </span>
           </Link>
         ))}
@@ -79,15 +96,15 @@ export function ResidentStatusCards({
         {blotter.map((c) => (
           <Link
             key={c.id}
-            href={`/resident/blotter`}
-            className="flex items-center justify-between p-4 rounded-2xl border bg-card active:scale-[0.98] transition-transform"
+            href="/resident/blotter"
+            className="flex items-center justify-between p-4 rounded-2xl border bg-card shadow-sm hover:bg-muted/20 active:scale-[0.98] transition-all duration-150"
           >
-            <div>
-              <p className="text-sm font-medium">{c.caseNumber}</p>
+            <div className="min-w-0 mr-3">
+              <p className="text-sm font-semibold">{c.caseNumber}</p>
               <p className="text-xs text-muted-foreground mt-0.5">Blotter Case</p>
             </div>
-            <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border capitalize ${statusColor[c.status] ?? ""}`}>
-              {c.status.replace("_", " ")}
+            <span className={`shrink-0 text-[10px] font-semibold px-3 py-1.5 rounded-full border ${statusStyle[c.status] ?? "bg-muted text-muted-foreground"}`}>
+              {statusLabel[c.status] ?? c.status}
             </span>
           </Link>
         ))}

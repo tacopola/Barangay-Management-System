@@ -17,31 +17,36 @@ export function ResidentAnnouncementFeed({
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">Announcements</h2>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+        Announcements
+      </p>
       <div className="space-y-3">
         {announcements.map((a) => (
           <div
             key={a.id}
-            className="p-4 rounded-2xl border bg-card"
+            className="p-4 rounded-2xl border bg-card shadow-sm"
           >
-            <div className="flex items-start gap-2">
-              {a.isPinned && (
-                <Pin className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-              )}
-              <div className="min-w-0">
-                <p className="text-sm font-semibold leading-snug">{a.title}</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-3">
-                  {a.body}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-2">
-                  {new Date(a.createdAt).toLocaleDateString("en-PH", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
+            {a.isPinned && (
+              <div className="flex items-center gap-1.5 mb-2">
+                <Pin className="h-3 w-3 text-primary" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-primary">
+                  Pinned
+                </span>
               </div>
-            </div>
+            )}
+            <p className="text-sm font-bold leading-snug text-foreground">
+              {a.title}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">
+              {a.body}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-3 font-medium">
+              {new Date(a.createdAt).toLocaleDateString("en-PH", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
           </div>
         ))}
       </div>

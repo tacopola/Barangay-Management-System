@@ -9,11 +9,11 @@ export function LogoutButton() {
     <form action={logoutResidentAction}>
       <Button
         type="submit"
-        variant="ghost"
+        variant="destructive"
         size="sm"
-        className="text-muted-foreground hover:text-foreground w-full justify-start gap-2"
+        className="w-full h-10 justify-center gap-2"
       >
-        <LogOut className="h-4 w-4" />
+        <LogOut/>
         Sign out
       </Button>
     </form>
