@@ -1,43 +1,45 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { resetAdminPasswordAction } from "@/actions/admin"
+import { useState, useTransition } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { resetAdminPasswordAction } from "@/actions/super_admin/admin";
 
 export function ResetPasswordForm({
   authId,
   onSuccess,
 }: {
-  authId: string
-  onSuccess?: () => void
+  authId: string;
+  onSuccess?: () => void;
 }) {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [error, setError] = useState("")
-  const [isPending, startTransition] = useTransition()
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
-    const form = e.currentTarget
-    const password = (form.elements.namedItem("password") as HTMLInputElement).value
-    const confirm = (form.elements.namedItem("confirm") as HTMLInputElement).value
+    const form = e.currentTarget;
+    const password = (form.elements.namedItem("password") as HTMLInputElement)
+      .value;
+    const confirm = (form.elements.namedItem("confirm") as HTMLInputElement)
+      .value;
 
     if (password !== confirm) {
-      setError("Passwords do not match.")
-      return
+      setError("Passwords do not match.");
+      return;
     }
 
     startTransition(async () => {
-      const res = await resetAdminPasswordAction(authId, password)
-      if (res.error) setError(res.error)
-      else onSuccess?.()
-    })
+      const res = await resetAdminPasswordAction(authId, password);
+      if (res.error) setError(res.error);
+      else onSuccess?.();
+    });
   }
 
   return (
@@ -75,20 +77,25 @@ export function ResetPasswordForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }
 
 function PasswordField({
-  id, label, show, onToggle,
+  id,
+  label,
+  show,
+  onToggle,
 }: {
-  id: string
-  label: string
-  show: boolean
-  onToggle: () => void
+  id: string;
+  label: string;
+  show: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-xs font-medium">{label}</Label>
+      <Label htmlFor={id} className="text-xs font-medium">
+        {label}
+      </Label>
       <div className="relative">
         <Input
           id={id}
@@ -107,9 +114,13 @@ function PasswordField({
           className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
           onClick={onToggle}
         >
-          {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          {show ? (
+            <EyeOff className="h-3.5 w-3.5" />
+          ) : (
+            <Eye className="h-3.5 w-3.5" />
+          )}
         </Button>
       </div>
     </div>
-  )
+  );
 }

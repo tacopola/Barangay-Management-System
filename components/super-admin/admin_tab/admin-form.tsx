@@ -1,57 +1,60 @@
-"use client"
+"use client";
 
-import { useActionState, useEffect, useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useActionState, useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Loader2, Eye, EyeOff } from "lucide-react"
-import { createAdminAction, updateAdminAction } from "@/actions/admin"
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  createAdminAction,
+  updateAdminAction,
+} from "@/actions/super_admin/admin";
+import { toast } from "sonner";
 
 type Admin = {
-  id: string
-  firstName: string
-  middleName: string | null
-  lastName: string
-  suffix: string | null
-  email: string | null
-  phoneNumber: string | null
-  barangayId: string | null
-}
+  id: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  suffix: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  barangayId: string | null;
+};
 
-type Barangay = { id: string; name: string }
+type Barangay = { id: string; name: string };
 
 export function AdminForm({
   admin,
   barangays,
   onSuccess,
 }: {
-  admin?: Admin | null
-  barangays: Barangay[]
-  onSuccess?: () => void
+  admin?: Admin | null;
+  barangays: Barangay[];
+  onSuccess?: () => void;
 }) {
   const action = admin
     ? updateAdminAction.bind(null, admin.id)
-    : createAdminAction
+    : createAdminAction;
 
-  const [state, formAction, isPending] = useActionState(action, {})
-  const [showPassword, setShowPassword] = useState(false)
-  const [barangayId, setBarangayId] = useState(admin?.barangayId ?? "")
+  const [state, formAction, isPending] = useActionState(action, {});
+  const [showPassword, setShowPassword] = useState(false);
+  const [barangayId, setBarangayId] = useState(admin?.barangayId ?? "");
 
   useEffect(() => {
     if (state.success) {
-      toast.success(admin ? "Admin updated." : "Admin account created.")
-      onSuccess?.()
+      toast.success(admin ? "Admin updated." : "Admin account created.");
+      onSuccess?.();
     }
-  }, [state.success])
+  }, [state.success]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -120,7 +123,9 @@ export function AdminForm({
           </SelectContent>
         </Select>
         {state.fieldErrors?.barangayId && (
-          <p className="text-xs text-destructive">{state.fieldErrors.barangayId}</p>
+          <p className="text-xs text-destructive">
+            {state.fieldErrors.barangayId}
+          </p>
         )}
       </div>
 
@@ -168,11 +173,17 @@ export function AdminForm({
               className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {showPassword ? (
+                <EyeOff className="h-3.5 w-3.5" />
+              ) : (
+                <Eye className="h-3.5 w-3.5" />
+              )}
             </Button>
           </div>
           {state.fieldErrors?.password && (
-            <p className="text-xs text-destructive">{state.fieldErrors.password}</p>
+            <p className="text-xs text-destructive">
+              {state.fieldErrors.password}
+            </p>
           )}
         </div>
       )}
@@ -192,20 +203,25 @@ export function AdminForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }
 
 function Field({
-  label, name, placeholder, defaultValue,
-  error, type = "text", required,
+  label,
+  name,
+  placeholder,
+  defaultValue,
+  error,
+  type = "text",
+  required,
 }: {
-  label: string
-  name: string
-  placeholder?: string
-  defaultValue?: string
-  error?: string
-  type?: string
-  required?: boolean
+  label: string;
+  name: string;
+  placeholder?: string;
+  defaultValue?: string;
+  error?: string;
+  type?: string;
+  required?: boolean;
 }) {
   return (
     <div className="space-y-1.5">
@@ -222,5 +238,5 @@ function Field({
       />
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
-  )
+  );
 }

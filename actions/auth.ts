@@ -6,7 +6,13 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+
 import { ROLE_HOME } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit-log";
+
+// ---------------------------------------------------------------------------
+// Schemas
+// ---------------------------------------------------------------------------
 
 const adminLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -26,6 +32,10 @@ export type ActionResult = {
   fieldErrors?: Record<string, string>;
 };
 
+// ---------------------------------------------------------------------------
+// Admin Login
+// ---------------------------------------------------------------------------
+
 export async function adminLoginAction(
   _prev: ActionResult,
   formData: FormData,
@@ -36,6 +46,7 @@ export async function adminLoginAction(
   };
 
   const parsed = adminLoginSchema.safeParse(raw);
+
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
@@ -43,16 +54,18 @@ export async function adminLoginAction(
   }
 
   const supabase = await createClient();
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
 
   if (error || !data.user) {
-    return { error: "Invalid email or password." };
+    return {
+      error: "Invalid email or password.",
+    };
   }
 
-  // Verify this auth user has an admin role in our users table
   const [dbUser] = await db
     .select()
     .from(users)
@@ -61,73 +74,193 @@ export async function adminLoginAction(
 
   if (!dbUser) {
     await supabase.auth.signOut();
-    return { error: "Account not found. Contact your administrator." };
+
+    return {
+      error: "Account not found. Contact your administrator.",
+    };
   }
 
   if (dbUser.role === "resident") {
     await supabase.auth.signOut();
-    return { error: "Please use the resident login instead." };
+
+    return {
+      error: "Please use the resident login instead.",
+    };
   }
 
   if (!dbUser.isActive) {
     await supabase.auth.signOut();
-    return { error: "Your account has been deactivated." };
+
+    return {
+      error: "Your account has been deactivated.",
+    };
   }
+
+  // -------------------------------------------------------------------------
+  // Audit Log
+  // -------------------------------------------------------------------------
+
+  await createAuditLog({
+    actorId: dbUser.id,
+    barangayId: dbUser.barangayId,
+    action: "update",
+    tableName: "auth",
+    recordId: dbUser.id,
+    newValue: {
+      event: "admin_login",
+      role: dbUser.role,
+      email: dbUser.email,
+      loggedInAt: new Date().toISOString(),
+    },
+  });
 
   redirect(ROLE_HOME[dbUser.role as keyof typeof ROLE_HOME]);
 }
 
+// ---------------------------------------------------------------------------
+// Resident Login
+// ---------------------------------------------------------------------------
+
 export async function residentLoginAction(
   _prev: ActionResult,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult> {
   const raw = {
     phoneNumber: formData.get("phoneNumber") as string,
     password: formData.get("password") as string,
-  }
+  };
 
-  const parsed = residentLoginSchema.safeParse(raw)
+  const parsed = residentLoginSchema.safeParse(raw);
+
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    }
+    };
   }
 
-  // Generate the hidden email from phone number
-  const generatedEmail = `${parsed.data.phoneNumber.replace(/\s+/g, "")}@bms.com`
+  const generatedEmail = `${parsed.data.phoneNumber.replace(/\s+/g, "")}@bms.com`;
 
-  const supabase = await createClient()
+  const supabase = await createClient();
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: generatedEmail,
     password: parsed.data.password,
-  })
+  });
 
   if (error || !data.user) {
-    return { error: "Invalid phone number or password." }
+    return {
+      error: "Invalid phone number or password.",
+    };
   }
 
   const [dbUser] = await db
     .select()
     .from(users)
     .where(eq(users.authId, data.user.id))
-    .limit(1)
+    .limit(1);
 
   if (!dbUser || !dbUser.isActive) {
-    await supabase.auth.signOut()
-    return { error: "Account deactivated. Contact your barangay." }
+    await supabase.auth.signOut();
+
+    return {
+      error: "Account deactivated. Contact your barangay.",
+    };
   }
 
-  redirect(ROLE_HOME.resident)
+  // -------------------------------------------------------------------------
+  // Audit Log
+  // -------------------------------------------------------------------------
+
+  await createAuditLog({
+    actorId: dbUser.id,
+    barangayId: dbUser.barangayId,
+    action: "update",
+    tableName: "auth",
+    recordId: dbUser.id,
+    newValue: {
+      event: "resident_login",
+      role: dbUser.role,
+      loggedInAt: new Date().toISOString(),
+    },
+  });
+
+  redirect(ROLE_HOME.resident);
 }
+
+// ---------------------------------------------------------------------------
+// Admin Logout
+// ---------------------------------------------------------------------------
 
 export async function logoutAdminAction() {
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const [dbUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.authId, user.id))
+      .limit(1);
+
+    if (dbUser) {
+      await createAuditLog({
+        actorId: dbUser.id,
+        barangayId: dbUser.barangayId,
+        action: "update",
+        tableName: "auth",
+        recordId: dbUser.id,
+        newValue: {
+          event: "admin_logout",
+          role: dbUser.role,
+          loggedOutAt: new Date().toISOString(),
+        },
+      });
+    }
+  }
+
   await supabase.auth.signOut();
+
   redirect("/auth/admin-login");
 }
 
+// ---------------------------------------------------------------------------
+// Resident Logout
+// ---------------------------------------------------------------------------
+
 export async function logoutResidentAction() {
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const [dbUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.authId, user.id))
+      .limit(1);
+
+    if (dbUser) {
+      await createAuditLog({
+        actorId: dbUser.id,
+        barangayId: dbUser.barangayId,
+        action: "update",
+        tableName: "auth",
+        recordId: dbUser.id,
+        newValue: {
+          event: "resident_logout",
+          role: dbUser.role,
+          loggedOutAt: new Date().toISOString(),
+        },
+      });
+    }
+  }
+
   await supabase.auth.signOut();
+
   redirect("/auth/resident-login");
 }

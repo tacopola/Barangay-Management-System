@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit-log";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -13,7 +14,7 @@ import { requireRole } from "@/lib/auth";
 
 const announcementSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
-  body: z.string().min(10, "Body must be at least 10 characters"),
+  body: z.string().min(5, "Body must be at least 5 characters"),
   barangayId: z.string().nullable().optional(),
   isPinned: z.boolean().default(false),
   expiresAt: z.string().optional().nullable(),
@@ -55,13 +56,27 @@ export async function createAnnouncementAction(
   }
 
   try {
-    await db.insert(announcements).values({
-      title: parsed.data.title,
-      body: parsed.data.body,
+    const [created] = await db
+      .insert(announcements)
+      .values({
+        title: parsed.data.title,
+        body: parsed.data.body,
+        barangayId: parsed.data.barangayId ?? null,
+        isPinned: parsed.data.isPinned,
+        expiresAt: parsed.data.expiresAt
+          ? new Date(parsed.data.expiresAt)
+          : null,
+        postedById: user.id,
+      })
+      .returning();
+
+    await createAuditLog({
+      actorId: user.id,
       barangayId: parsed.data.barangayId ?? null,
-      isPinned: parsed.data.isPinned,
-      expiresAt: parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null,
-      postedById: user.id,
+      action: "create",
+      tableName: "announcements",
+      recordId: created.id,
+      newValue: created,
     });
 
     revalidatePath("/super-admin/announcements");
@@ -81,7 +96,7 @@ export async function updateAnnouncementAction(
   _prev: AnnouncementFormState,
   formData: FormData,
 ): Promise<AnnouncementFormState> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   const barangayIdRaw = formData.get("barangayId") as string;
   const expiresAtRaw = formData.get("expiresAt") as string;
@@ -103,7 +118,12 @@ export async function updateAnnouncementAction(
   }
 
   try {
-    await db
+    const [existing] = await db
+      .select()
+      .from(announcements)
+      .where(eq(announcements.id, id));
+
+    const [updated] = await db
       .update(announcements)
       .set({
         title: parsed.data.title,
@@ -115,7 +135,18 @@ export async function updateAnnouncementAction(
           : null,
         updatedAt: new Date(),
       })
-      .where(eq(announcements.id, id));
+      .where(eq(announcements.id, id))
+      .returning();
+
+    await createAuditLog({
+      actorId: user.id,
+      barangayId: parsed.data.barangayId ?? null,
+      action: "update",
+      tableName: "announcements",
+      recordId: id,
+      previousValue: existing,
+      newValue: updated,
+    });
 
     revalidatePath("/super-admin/announcements");
     return { success: true };
@@ -133,13 +164,32 @@ export async function togglePinAction(
   id: string,
   isPinned: boolean,
 ): Promise<{ error?: string }> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   try {
-    await db
-      .update(announcements)
-      .set({ isPinned: !isPinned, updatedAt: new Date() })
+    const [existing] = await db
+      .select()
+      .from(announcements)
       .where(eq(announcements.id, id));
+
+    const [updated] = await db
+      .update(announcements)
+      .set({
+        isPinned: !isPinned,
+        updatedAt: new Date(),
+      })
+      .where(eq(announcements.id, id))
+      .returning();
+
+    await createAuditLog({
+      actorId: user.id,
+      barangayId: existing.barangayId ?? null,
+      action: "update",
+      tableName: "announcements",
+      recordId: id,
+      previousValue: existing,
+      newValue: updated,
+    });
 
     revalidatePath("/super-admin/announcements");
     return {};
@@ -156,10 +206,25 @@ export async function togglePinAction(
 export async function deleteAnnouncementAction(
   id: string,
 ): Promise<{ error?: string }> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   try {
+    const [existing] = await db
+      .select()
+      .from(announcements)
+      .where(eq(announcements.id, id));
+
     await db.delete(announcements).where(eq(announcements.id, id));
+
+    await createAuditLog({
+      actorId: user.id,
+      barangayId: existing?.barangayId ?? null,
+      action: "delete",
+      tableName: "announcements",
+      recordId: id,
+      previousValue: existing,
+    });
+
     revalidatePath("/super-admin/announcements");
     return {};
   } catch (e) {

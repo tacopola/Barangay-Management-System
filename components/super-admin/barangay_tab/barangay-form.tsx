@@ -1,44 +1,47 @@
-"use client"
+"use client";
 
-import { useActionState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2 } from "lucide-react"
-import { createBarangayAction, updateBarangayAction } from "@/actions/barangay"
-import { toast } from "sonner"
+import { useActionState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import {
+  createBarangayAction,
+  updateBarangayAction,
+} from "@/actions/super_admin/barangay";
+import { toast } from "sonner";
 
 type Barangay = {
-  id: string
-  name: string
-  municipality: string
-  province: string
-  region: string
-  zipCode: string | null
-  contactNumber: string | null
-  email: string | null
-}
+  id: string;
+  name: string;
+  municipality: string;
+  province: string;
+  region: string;
+  zipCode: string | null;
+  contactNumber: string | null;
+  email: string | null;
+};
 
 export function BarangayForm({
   barangay,
   onSuccess,
 }: {
-  barangay?: Barangay | null
-  onSuccess?: () => void
+  barangay?: Barangay | null;
+  onSuccess?: () => void;
 }) {
   const action = barangay
     ? updateBarangayAction.bind(null, barangay.id)
-    : createBarangayAction
+    : createBarangayAction;
 
-  const [state, formAction, isPending] = useActionState(action, {})
+  const [state, formAction, isPending] = useActionState(action, {});
 
   useEffect(() => {
     if (state.success) {
-      toast.success(barangay ? "Barangay updated." : "Barangay registered.")
-      onSuccess?.()
+      toast.success(barangay ? "Barangay updated." : "Barangay registered.");
+      onSuccess?.();
     }
-  }, [state.success])
+  }, [state.success]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -124,7 +127,7 @@ export function BarangayForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }
 
 function Field({
@@ -136,13 +139,13 @@ function Field({
   type = "text",
   required,
 }: {
-  label: string
-  name: string
-  placeholder?: string
-  defaultValue?: string
-  error?: string
-  type?: string
-  required?: boolean
+  label: string;
+  name: string;
+  placeholder?: string;
+  defaultValue?: string;
+  error?: string;
+  type?: string;
+  required?: boolean;
 }) {
   return (
     <div className="space-y-1.5">
@@ -159,5 +162,5 @@ function Field({
       />
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
-  )
+  );
 }

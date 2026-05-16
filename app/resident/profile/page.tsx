@@ -107,7 +107,7 @@ export default async function ResidentProfilePage() {
       )}
 
       {/* Settings / actions */}
-      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+      {/* <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b">
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             Account
@@ -123,7 +123,7 @@ export default async function ResidentProfilePage() {
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Logout */}
       <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">

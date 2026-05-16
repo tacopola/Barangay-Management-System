@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,8 +27,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@/components/ui/alert-dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   Plus,
@@ -39,77 +39,81 @@ import {
   Building2,
   Users,
   UserCheck,
-} from "lucide-react"
-import { toggleBarangayStatusAction, deleteBarangayAction } from "@/actions/barangay"
-import { BarangayForm } from "./barangay-form"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+} from "lucide-react";
+import {
+  toggleBarangayStatusAction,
+  deleteBarangayAction,
+} from "@/actions/super_admin/barangay";
+import { BarangayForm } from "./barangay-form";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type Barangay = {
-  id: string
-  name: string
-  municipality: string
-  province: string
-  region: string
-  zipCode: string | null
-  contactNumber: string | null
-  email: string | null
-  isActive: boolean
-  adminCount: number
-  residentCount: number
-}
+  id: string;
+  name: string;
+  municipality: string;
+  province: string;
+  region: string;
+  zipCode: string | null;
+  contactNumber: string | null;
+  email: string | null;
+  isActive: boolean;
+  adminCount: number;
+  residentCount: number;
+};
 
-type Filter = "all" | "active" | "inactive"
+type Filter = "all" | "active" | "inactive";
 
 export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
-  const router = useRouter()
-  const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState<Filter>("all")
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editTarget, setEditTarget] = useState<Barangay | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<Barangay | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Barangay | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Barangay | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const filtered = barangays.filter((b) => {
-    const matchSearch = b.name.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = b.name.toLowerCase().includes(search.toLowerCase());
     const matchFilter =
       filter === "all" ||
       (filter === "active" && b.isActive) ||
-      (filter === "inactive" && !b.isActive)
-    return matchSearch && matchFilter
-  })
+      (filter === "inactive" && !b.isActive);
+    return matchSearch && matchFilter;
+  });
 
-  const activeCount = barangays.filter((b) => b.isActive).length
-  const inactiveCount = barangays.filter((b) => !b.isActive).length
+  const activeCount = barangays.filter((b) => b.isActive).length;
+  const inactiveCount = barangays.filter((b) => !b.isActive).length;
 
   function openCreate() {
-    setEditTarget(null)
-    setDialogOpen(true)
+    setEditTarget(null);
+    setDialogOpen(true);
   }
 
   function openEdit(b: Barangay) {
-    setEditTarget(b)
-    setDialogOpen(true)
+    setEditTarget(b);
+    setDialogOpen(true);
   }
 
   function handleToggleStatus(b: Barangay) {
     startTransition(async () => {
-      const res = await toggleBarangayStatusAction(b.id, b.isActive)
-      if (res.error) toast.error(res.error)
-      else toast.success(`${b.name} ${b.isActive ? "deactivated" : "activated"}.`)
-      router.refresh()
-    })
+      const res = await toggleBarangayStatusAction(b.id, b.isActive);
+      if (res.error) toast.error(res.error);
+      else
+        toast.success(`${b.name} ${b.isActive ? "deactivated" : "activated"}.`);
+      router.refresh();
+    });
   }
 
   function handleDelete() {
-    if (!deleteTarget) return
+    if (!deleteTarget) return;
     startTransition(async () => {
-      const res = await deleteBarangayAction(deleteTarget.id)
-      if (res.error) toast.error(res.error)
-      else toast.success(`${deleteTarget.name} deleted.`)
-      setDeleteTarget(null)
-      router.refresh()
-    })
+      const res = await deleteBarangayAction(deleteTarget.id);
+      if (res.error) toast.error(res.error);
+      else toast.success(`${deleteTarget.name} deleted.`);
+      setDeleteTarget(null);
+      router.refresh();
+    });
   }
 
   return (
@@ -138,7 +142,6 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
 
       {/* Table card */}
       <div className="rounded-xl border bg-card overflow-hidden">
-
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b gap-4">
           <div>
@@ -147,7 +150,11 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
               {filtered.length} of {barangays.length} barangays
             </p>
           </div>
-          <Button size="sm" className="text-xs h-8 gap-1.5" onClick={openCreate}>
+          <Button
+            size="sm"
+            className="text-xs h-8 gap-1.5"
+            onClick={openCreate}
+          >
             <Plus className="h-3.5 w-3.5" />
             Add Barangay
           </Button>
@@ -205,7 +212,10 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-sm text-muted-foreground">
+                  <td
+                    colSpan={6}
+                    className="text-center py-16 text-sm text-muted-foreground"
+                  >
                     <Building2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     No barangays found
                   </td>
@@ -225,8 +235,12 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
                       )}
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
-                      <p className="text-sm text-muted-foreground">{b.municipality}</p>
-                      <p className="text-xs text-muted-foreground">{b.province}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {b.municipality}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {b.province}
+                      </p>
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1.5">
@@ -235,7 +249,9 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden sm:table-cell">
-                      <span className="text-sm">{b.residentCount.toLocaleString()}</span>
+                      <span className="text-sm">
+                        {b.residentCount.toLocaleString()}
+                      </span>
                     </td>
                     <td className="px-5 py-3.5">
                       <Badge
@@ -248,7 +264,11 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
                     <td className="px-5 py-3.5 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -257,7 +277,9 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
                             <Pencil className="h-3.5 w-3.5 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleStatus(b)}>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleStatus(b)}
+                          >
                             <Power className="h-3.5 w-3.5 mr-2" />
                             {b.isActive ? "Deactivate" : "Activate"}
                           </DropdownMenuItem>
@@ -296,8 +318,8 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
           <BarangayForm
             barangay={editTarget}
             onSuccess={() => {
-              setDialogOpen(false)
-              router.refresh()
+              setDialogOpen(false);
+              router.refresh();
             }}
           />
         </DialogContent>
@@ -328,7 +350,7 @@ export function BarangayListClient({ barangays }: { barangays: Barangay[] }) {
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }
 
 function StatCard({
@@ -337,18 +359,20 @@ function StatCard({
   value,
   accent,
 }: {
-  icon: React.ReactNode
-  label: string
-  value: number
-  accent: string
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  accent: string;
 }) {
   return (
     <div className={`rounded-xl border bg-card p-4 border-t-2 ${accent}`}>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wider">
+          {label}
+        </p>
         {icon}
       </div>
       <p className="text-3xl font-light">{value}</p>
     </div>
-  )
+  );
 }

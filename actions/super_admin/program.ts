@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit-log";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -34,7 +35,7 @@ export async function createProgramAction(
   _prev: ProgramFormState,
   formData: FormData,
 ): Promise<ProgramFormState> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   const raw = {
     name: formData.get("name") as string,
@@ -51,12 +52,24 @@ export async function createProgramAction(
   }
 
   try {
-    await db.insert(programs).values({
-      name: parsed.data.name,
-      type: parsed.data.type,
+    const [created] = await db
+      .insert(programs)
+      .values({
+        name: parsed.data.name,
+        type: parsed.data.type,
+        barangayId: parsed.data.barangayId,
+        description: parsed.data.description,
+        isActive: true,
+      })
+      .returning();
+
+    await createAuditLog({
+      actorId: user.id,
       barangayId: parsed.data.barangayId,
-      description: parsed.data.description,
-      isActive: true,
+      action: "create",
+      tableName: "programs",
+      recordId: created.id,
+      newValue: created,
     });
 
     revalidatePath("/super-admin/programs");
@@ -76,7 +89,7 @@ export async function updateProgramAction(
   _prev: ProgramFormState,
   formData: FormData,
 ): Promise<ProgramFormState> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   const raw = {
     name: formData.get("name") as string,
@@ -93,7 +106,12 @@ export async function updateProgramAction(
   }
 
   try {
-    await db
+    const [existing] = await db
+      .select()
+      .from(programs)
+      .where(eq(programs.id, id));
+
+    const [updated] = await db
       .update(programs)
       .set({
         name: parsed.data.name,
@@ -102,7 +120,18 @@ export async function updateProgramAction(
         description: parsed.data.description,
         updatedAt: new Date(),
       })
-      .where(eq(programs.id, id));
+      .where(eq(programs.id, id))
+      .returning();
+
+    await createAuditLog({
+      actorId: user.id,
+      barangayId: parsed.data.barangayId,
+      action: "update",
+      tableName: "programs",
+      recordId: id,
+      previousValue: existing,
+      newValue: updated,
+    });
 
     revalidatePath("/super-admin/programs");
     return { success: true };
@@ -120,13 +149,32 @@ export async function toggleProgramStatusAction(
   id: string,
   isActive: boolean,
 ): Promise<{ error?: string }> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   try {
-    await db
-      .update(programs)
-      .set({ isActive: !isActive, updatedAt: new Date() })
+    const [existing] = await db
+      .select()
+      .from(programs)
       .where(eq(programs.id, id));
+
+    const [updated] = await db
+      .update(programs)
+      .set({
+        isActive: !isActive,
+        updatedAt: new Date(),
+      })
+      .where(eq(programs.id, id))
+      .returning();
+
+    await createAuditLog({
+      actorId: user.id,
+      barangayId: existing.barangayId,
+      action: "update",
+      tableName: "programs",
+      recordId: id,
+      previousValue: existing,
+      newValue: updated,
+    });
 
     revalidatePath("/super-admin/programs");
     return {};
@@ -143,10 +191,25 @@ export async function toggleProgramStatusAction(
 export async function deleteProgramAction(
   id: string,
 ): Promise<{ error?: string }> {
-  await requireRole("super_admin");
+  const user = await requireRole("super_admin");
 
   try {
+    const [existing] = await db
+      .select()
+      .from(programs)
+      .where(eq(programs.id, id));
+
     await db.delete(programs).where(eq(programs.id, id));
+
+    await createAuditLog({
+      actorId: user.id,
+      barangayId: existing?.barangayId ?? null,
+      action: "delete",
+      tableName: "programs",
+      recordId: id,
+      previousValue: existing,
+    });
+
     revalidatePath("/super-admin/programs");
     return {};
   } catch (e) {

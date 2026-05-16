@@ -1,21 +1,24 @@
-"use client"
+"use client";
 
-import { useActionState, useEffect, useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Textarea } from "@/components/ui/textarea"
+import { useActionState, useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
-import { createProgramAction, updateProgramAction } from "@/actions/program"
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
+import {
+  createProgramAction,
+  updateProgramAction,
+} from "@/actions/super_admin/program";
+import { toast } from "sonner";
 
 const PROGRAM_TYPES = [
   { value: "4ps", label: "4Ps (Pantawid Pamilya)" },
@@ -23,41 +26,41 @@ const PROGRAM_TYPES = [
   { value: "pwd", label: "PWD" },
   { value: "solo_parent", label: "Solo Parent" },
   { value: "indigent", label: "Indigent" },
-]
+];
 
 type Program = {
-  id: string
-  name: string
-  type: string
-  description: string | null
-  barangayId: string | null
-}
+  id: string;
+  name: string;
+  type: string;
+  description: string | null;
+  barangayId: string | null;
+};
 
-type Barangay = { id: string; name: string }
+type Barangay = { id: string; name: string };
 
 export function ProgramForm({
   program,
   barangays,
   onSuccess,
 }: {
-  program?: Program | null
-  barangays: Barangay[]
-  onSuccess?: () => void
+  program?: Program | null;
+  barangays: Barangay[];
+  onSuccess?: () => void;
 }) {
   const action = program
     ? updateProgramAction.bind(null, program.id)
-    : createProgramAction
+    : createProgramAction;
 
-  const [state, formAction, isPending] = useActionState(action, {})
-  const [type, setType] = useState(program?.type ?? "")
-  const [barangayId, setBarangayId] = useState(program?.barangayId ?? "")
+  const [state, formAction, isPending] = useActionState(action, {});
+  const [type, setType] = useState(program?.type ?? "");
+  const [barangayId, setBarangayId] = useState(program?.barangayId ?? "");
 
   useEffect(() => {
     if (state.success) {
-      toast.success(program ? "Program updated." : "Program created.")
-      onSuccess?.()
+      toast.success(program ? "Program updated." : "Program created.");
+      onSuccess?.();
     }
-  }, [state.success])
+  }, [state.success]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -111,7 +114,11 @@ export function ProgramForm({
         <Label className="text-xs font-medium">
           Barangay <span className="text-destructive">*</span>
         </Label>
-        <Select name="barangayId" value={barangayId} onValueChange={setBarangayId}>
+        <Select
+          name="barangayId"
+          value={barangayId}
+          onValueChange={setBarangayId}
+        >
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder="Select barangay..." />
           </SelectTrigger>
@@ -124,7 +131,9 @@ export function ProgramForm({
           </SelectContent>
         </Select>
         {state.fieldErrors?.barangayId && (
-          <p className="text-xs text-destructive">{state.fieldErrors.barangayId}</p>
+          <p className="text-xs text-destructive">
+            {state.fieldErrors.barangayId}
+          </p>
         )}
       </div>
 
@@ -158,5 +167,5 @@ export function ProgramForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }

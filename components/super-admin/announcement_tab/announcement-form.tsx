@@ -7,7 +7,7 @@ import { useActionState, useEffect } from "react";
 import {
   createAnnouncementAction,
   updateAnnouncementAction,
-} from "@/actions/announcement";
+} from "@/actions/super_admin/announcement";
 
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";

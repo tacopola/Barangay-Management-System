@@ -1,4 +1,3 @@
-import { requireRole } from "@/lib/auth";
 import { db } from "@/db";
 import {
   barangays,
@@ -34,7 +33,6 @@ async function getAllBarangays() {
 }
 
 export default async function SuperAdminPage() {
-  await requireRole("super_admin");
   const [stats, allBarangays] = await Promise.all([
     getStats(),
     getAllBarangays(),

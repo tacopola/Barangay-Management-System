@@ -7,7 +7,7 @@ import { Pin, Trash2, Pencil, Megaphone } from "lucide-react";
 import {
   deleteAnnouncementAction,
   togglePinAction,
-} from "@/actions/announcement";
+} from "@/actions/super_admin/announcement";
 
 import { AnnouncementForm } from "./announcement-form";
 
