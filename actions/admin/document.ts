@@ -1,11 +1,11 @@
-"use server"
+"use server";
 
-import { db } from "@/db"
-import { documentRequests, residents } from "@/db/schema"
-import { eq, and } from "drizzle-orm"
-import { revalidatePath } from "next/cache"
-import { z } from "zod"
-import { requireRole } from "@/lib/auth"
+import { db } from "@/db";
+import { documentRequests, residents } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireRole } from "@/lib/auth";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -21,14 +21,14 @@ const requestSchema = z.object({
     "good_moral_certificate",
   ]),
   purpose: z.string().min(5, "Purpose must be at least 5 characters"),
-})
+});
 
 export type DocRequestFormState = {
-  error?: string
-  fieldErrors?: Record<string, string>
-  success?: boolean
-  requestId?: string
-}
+  error?: string;
+  fieldErrors?: Record<string, string>;
+  success?: boolean;
+  requestId?: string;
+};
 
 // ---------------------------------------------------------------------------
 // Generate control number
@@ -36,18 +36,18 @@ export type DocRequestFormState = {
 
 function generateControlNumber(docType: string, barangayId: string) {
   const prefix: Record<string, string> = {
-    barangay_clearance:       "BC",
+    barangay_clearance: "BC",
     certificate_of_residency: "CR",
     certificate_of_indigency: "CI",
-    barangay_id:              "ID",
-    business_clearance:       "BZ",
-    good_moral_certificate:   "GM",
-  }
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  const rand = Math.floor(Math.random() * 9000 + 1000)
-  return `${prefix[docType] ?? "DOC"}-${year}${month}-${rand}`
+    barangay_id: "ID",
+    business_clearance: "BZ",
+    good_moral_certificate: "GM",
+  };
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const rand = Math.floor(Math.random() * 9000 + 1000);
+  return `${prefix[docType] ?? "DOC"}-${year}${month}-${rand}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -56,20 +56,20 @@ function generateControlNumber(docType: string, barangayId: string) {
 
 export async function requestDocumentAction(
   _prev: DocRequestFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<DocRequestFormState> {
-  const user = await requireRole("resident")
+  const user = await requireRole("resident");
 
   const raw = {
     docType: formData.get("docType") as string,
     purpose: formData.get("purpose") as string,
-  }
+  };
 
-  const parsed = requestSchema.safeParse(raw)
+  const parsed = requestSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    }
+    };
   }
 
   // Get resident record
@@ -77,11 +77,14 @@ export async function requestDocumentAction(
     .select()
     .from(residents)
     .where(eq(residents.userId, user.id))
-    .limit(1)
+    .limit(1);
 
-  if (!resident) return { error: "Resident record not found." }
+  if (!resident) return { error: "Resident record not found." };
 
-  const controlNumber = generateControlNumber(parsed.data.docType, user.barangayId!)
+  const controlNumber = generateControlNumber(
+    parsed.data.docType,
+    user.barangayId!,
+  );
 
   try {
     const [newRequest] = await db
@@ -95,12 +98,13 @@ export async function requestDocumentAction(
         status: "pending",
         controlNumber,
       })
-      .returning({ id: documentRequests.id })
+      .returning({ id: documentRequests.id });
 
-    revalidatePath("/resident/documents")
-    return { success: true, requestId: newRequest.id }
+    revalidatePath("/resident/documents");
+    return { success: true, requestId: newRequest.id };
   } catch (e) {
-    return { error: "Failed to submit request. Please try again." }
+    console.error("Error creating document request:", e);
+    return { error: "Failed to submit request. Please try again." };
   }
 }
 
@@ -110,26 +114,29 @@ export async function requestDocumentAction(
 
 export async function adminRequestDocumentAction(
   _prev: DocRequestFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<DocRequestFormState> {
-  const admin = await requireRole("barangay_admin")
+  const admin = await requireRole("barangay_admin");
 
-  const residentId = formData.get("residentId") as string
+  const residentId = formData.get("residentId") as string;
   const raw = {
     docType: formData.get("docType") as string,
     purpose: formData.get("purpose") as string,
-  }
+  };
 
-  if (!residentId) return { error: "Please select a resident." }
+  if (!residentId) return { error: "Please select a resident." };
 
-  const parsed = requestSchema.safeParse(raw)
+  const parsed = requestSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    }
+    };
   }
 
-  const controlNumber = generateControlNumber(parsed.data.docType, admin.barangayId!)
+  const controlNumber = generateControlNumber(
+    parsed.data.docType,
+    admin.barangayId!,
+  );
 
   try {
     const [newRequest] = await db
@@ -143,12 +150,13 @@ export async function adminRequestDocumentAction(
         status: "pending",
         controlNumber,
       })
-      .returning({ id: documentRequests.id })
+      .returning({ id: documentRequests.id });
 
-    revalidatePath("/admin/documents")
-    return { success: true, requestId: newRequest.id }
+    revalidatePath("/admin/documents");
+    return { success: true, requestId: newRequest.id };
   } catch (e) {
-    return { error: "Failed to create request. Please try again." }
+    console.error("Error creating document request:", e);
+    return { error: "Failed to create request. Please try again." };
   }
 }
 
@@ -157,9 +165,9 @@ export async function adminRequestDocumentAction(
 // ---------------------------------------------------------------------------
 
 export async function approveDocumentAction(
-  id: string
+  id: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin")
+  const admin = await requireRole("barangay_admin");
 
   try {
     await db
@@ -173,14 +181,15 @@ export async function approveDocumentAction(
       .where(
         and(
           eq(documentRequests.id, id),
-          eq(documentRequests.barangayId, admin.barangayId!)
-        )
-      )
+          eq(documentRequests.barangayId, admin.barangayId!),
+        ),
+      );
 
-    revalidatePath("/admin/documents")
-    return {}
+    revalidatePath("/admin/documents");
+    return {};
   } catch (e) {
-    return { error: "Failed to approve request." }
+    console.error("Error approving document request:", e);
+    return { error: "Failed to approve request." };
   }
 }
 
@@ -190,12 +199,12 @@ export async function approveDocumentAction(
 
 export async function rejectDocumentAction(
   id: string,
-  reason: string
+  reason: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin")
+  const admin = await requireRole("barangay_admin");
 
   if (!reason || reason.length < 5) {
-    return { error: "Please provide a rejection reason." }
+    return { error: "Please provide a rejection reason." };
   }
 
   try {
@@ -211,14 +220,15 @@ export async function rejectDocumentAction(
       .where(
         and(
           eq(documentRequests.id, id),
-          eq(documentRequests.barangayId, admin.barangayId!)
-        )
-      )
+          eq(documentRequests.barangayId, admin.barangayId!),
+        ),
+      );
 
-    revalidatePath("/admin/documents")
-    return {}
+    revalidatePath("/admin/documents");
+    return {};
   } catch (e) {
-    return { error: "Failed to reject request." }
+    console.error("Error rejecting document request:", e);
+    return { error: "Failed to reject request." };
   }
 }
 
@@ -228,9 +238,9 @@ export async function rejectDocumentAction(
 
 export async function releaseDocumentAction(
   id: string,
-  orNumber: string
+  orNumber: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin")
+  const admin = await requireRole("barangay_admin");
 
   try {
     await db
@@ -244,13 +254,14 @@ export async function releaseDocumentAction(
       .where(
         and(
           eq(documentRequests.id, id),
-          eq(documentRequests.barangayId, admin.barangayId!)
-        )
-      )
+          eq(documentRequests.barangayId, admin.barangayId!),
+        ),
+      );
 
-    revalidatePath("/admin/documents")
-    return {}
+    revalidatePath("/admin/documents");
+    return {};
   } catch (e) {
-    return { error: "Failed to release document." }
+    console.error("Error releasing document:", e);
+    return { error: "Failed to release document." };
   }
 }

@@ -52,10 +52,6 @@ export const barangays = pgTable("barangays", {
   ...timestamps,
 });
 
-// ---------------------------------------------------------------------------
-// Users  (mirrors Supabase auth.users via auth_id)
-// ---------------------------------------------------------------------------
-
 export const users = pgTable(
   "users",
   {

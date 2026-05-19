@@ -42,7 +42,6 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   barangay_clearance: "Barangay Clearance",
   certificate_of_residency: "Cert. of Residency",
   certificate_of_indigency: "Cert. of Indigency",
-  barangay_id: "Barangay ID",
   business_clearance: "Business Clearance",
   good_moral_certificate: "Good Moral Cert.",
 };
@@ -167,9 +166,9 @@ export function DocumentQueueClient({
     });
   }
 
-function handlePrint(id: string) {
-  window.open(`/api/documents/${id}/print`, "_blank")
-}
+  function handlePrint(id: string) {
+    window.open(`/api/documents/${id}/print`, "_blank");
+  }
 
   return (
     <>
