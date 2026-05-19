@@ -1,4 +1,3 @@
-import { requireRole } from "@/lib/auth"
 import { db } from "@/db"
 import { programs, barangays, programBeneficiaries } from "@/db/schema"
 import { eq, count } from "drizzle-orm"
@@ -43,7 +42,6 @@ async function getAllBarangays() {
 }
 
 export default async function ProgramsPage() {
-  await requireRole("super_admin")
   const [data, allBarangays] = await Promise.all([
     getProgramsWithStats(),
     getAllBarangays(),

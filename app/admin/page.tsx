@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/auth";
+import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { db } from "@/db";
 import {
   residents,
@@ -84,8 +84,7 @@ async function getBarangayName(barangayId: string) {
 }
 
 export default async function AdminDashboardPage() {
-  const user = await requireRole("barangay_admin");
-  const barangayId = user.barangayId!;
+  const { admin, barangayId } = await requireBarangayAdmin();
 
   const [stats, recentDocs, recentBlotter, barangayName] = await Promise.all([
     getStats(barangayId),
@@ -105,7 +104,7 @@ export default async function AdminDashboardPage() {
           {barangayName}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Good day, {user.firstName}. Here&apos;s what&apos;s happening today.
+          Good day, {admin.firstName}. Here&apos;s what&apos;s happening today.
         </p>
       </div>
 

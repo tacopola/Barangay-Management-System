@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth";
-import { createAuditLog } from "@/lib/audit-log";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 // ---------------------------------------------------------------------------
 // Schema

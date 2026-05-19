@@ -68,3 +68,4 @@ export const financialTypeEnum = pgEnum("financial_type", [
   "income",
   "expense",
 ])
+

@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth"
+import { requireBarangayAdmin } from "@/lib/auth-helper"
 import { db } from "@/db"
 import { residents, households } from "@/db/schema"
 import { eq } from "drizzle-orm"
@@ -48,8 +49,7 @@ async function getHouseholds(barangayId: string) {
 }
 
 export default async function ResidentsPage() {
-  const admin = await requireRole("barangay_admin")
-  const barangayId = admin.barangayId!
+  const { barangayId } = await requireBarangayAdmin()
 
   const [allResidents, allHouseholds] = await Promise.all([
     getResidents(barangayId),

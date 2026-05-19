@@ -1,10 +1,6 @@
-import { requireRole } from "@/lib/auth";
 import { db } from "@/db";
-
 import { auditLogs, users, barangays } from "@/db/schema";
-
 import { desc, eq, sql } from "drizzle-orm";
-
 import { AuditLogsClient } from "@/components/super-admin/audit-log_tab/audit-logs-client";
 
 async function getAuditLogs() {
@@ -38,8 +34,6 @@ async function getAuditLogs() {
 }
 
 export default async function AuditLogsPage() {
-  await requireRole("super_admin");
-
   const logs = await getAuditLogs();
 
   return (

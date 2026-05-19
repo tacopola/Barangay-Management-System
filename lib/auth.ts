@@ -53,14 +53,12 @@ export const getAuthUser = cache(async (): Promise<AuthUser | null> => {
   };
 });
 
-// redirects if not authenticated
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getAuthUser();
   if (!user) redirect("/auth/resident-login");
   return user;
 }
 
-// redirects if wrong role
 export async function requireRole(...roles: UserRole[]): Promise<AuthUser> {
   const user = await requireAuth();
 

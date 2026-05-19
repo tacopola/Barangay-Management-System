@@ -1,4 +1,3 @@
-import { requireRole } from "@/lib/auth";
 import { db } from "@/db";
 import {
   residents,
@@ -26,6 +25,7 @@ import {
   Clock,
   BookOpen,
 } from "lucide-react";
+import { requireBarangayAdmin } from "@/lib/auth-helper";
 
 function calculateAge(birthDate: string) {
   const birth = new Date(birthDate);
@@ -51,8 +51,7 @@ export default async function ResidentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const admin = await requireRole("barangay_admin");
-  const barangayId = admin.barangayId!;
+  const { barangayId } = await requireBarangayAdmin();
 
   const { id } = await params;
   const resident = await getResident(id, barangayId);

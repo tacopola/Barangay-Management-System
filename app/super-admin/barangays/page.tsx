@@ -1,4 +1,3 @@
-import { requireRole } from "@/lib/auth"
 import { db } from "@/db"
 import { barangays, users, residents } from "@/db/schema"
 import { eq, count, and } from "drizzle-orm"
@@ -42,7 +41,6 @@ async function getBarangaysWithStats() {
 }
 
 export default async function BarangaysPage() {
-  await requireRole("super_admin")
   const data = await getBarangaysWithStats()
 
   return (

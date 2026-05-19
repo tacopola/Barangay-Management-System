@@ -1,6 +1,3 @@
-// app/super-admin/announcements/page.tsx
-
-import { requireRole } from "@/lib/auth";
 import { db } from "@/db";
 import { announcements, barangays, users } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
@@ -36,8 +33,6 @@ async function getBarangays() {
 }
 
 export default async function AnnouncementsPage() {
-  await requireRole("super_admin");
-
   const [announcementData, barangayData] = await Promise.all([
     getAnnouncements(),
     getBarangays(),

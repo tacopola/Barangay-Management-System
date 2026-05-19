@@ -8,11 +8,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { ROLE_HOME } from "@/lib/auth";
-import { createAuditLog } from "@/lib/audit-log";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 const adminLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,10 +27,6 @@ export type ActionResult = {
   error?: string;
   fieldErrors?: Record<string, string>;
 };
-
-// ---------------------------------------------------------------------------
-// Admin Login
-// ---------------------------------------------------------------------------
 
 export async function adminLoginAction(
   _prev: ActionResult,
@@ -96,10 +88,6 @@ export async function adminLoginAction(
     };
   }
 
-  // -------------------------------------------------------------------------
-  // Audit Log
-  // -------------------------------------------------------------------------
-
   await createAuditLog({
     actorId: dbUser.id,
     barangayId: dbUser.barangayId,
@@ -116,10 +104,6 @@ export async function adminLoginAction(
 
   redirect(ROLE_HOME[dbUser.role as keyof typeof ROLE_HOME]);
 }
-
-// ---------------------------------------------------------------------------
-// Resident Login
-// ---------------------------------------------------------------------------
 
 export async function residentLoginAction(
   _prev: ActionResult,
@@ -167,10 +151,6 @@ export async function residentLoginAction(
     };
   }
 
-  // -------------------------------------------------------------------------
-  // Audit Log
-  // -------------------------------------------------------------------------
-
   await createAuditLog({
     actorId: dbUser.id,
     barangayId: dbUser.barangayId,
@@ -186,10 +166,6 @@ export async function residentLoginAction(
 
   redirect(ROLE_HOME.resident);
 }
-
-// ---------------------------------------------------------------------------
-// Admin Logout
-// ---------------------------------------------------------------------------
 
 export async function logoutAdminAction() {
   const supabase = await createClient();
@@ -225,10 +201,6 @@ export async function logoutAdminAction() {
 
   redirect("/auth/admin-login");
 }
-
-// ---------------------------------------------------------------------------
-// Resident Logout
-// ---------------------------------------------------------------------------
 
 export async function logoutResidentAction() {
   const supabase = await createClient();

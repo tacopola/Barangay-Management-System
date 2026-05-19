@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import { requireRole } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { createAuditLog } from "@/lib/audit-log";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 // ---------------------------------------------------------------------------
 // Schemas

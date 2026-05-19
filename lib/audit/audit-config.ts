@@ -13,10 +13,6 @@ export const DEFAULT_HIDDEN_FIELDS = [
 ];
 
 export const AUDIT_CONFIG: Record<string, AuditTableConfig> = {
-  // ---------------------------------------------------------------------------
-  // Barangays
-  // ---------------------------------------------------------------------------
-
   barangays: {
     labels: {
       name: "Barangay Name",

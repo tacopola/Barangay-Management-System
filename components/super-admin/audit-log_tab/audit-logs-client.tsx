@@ -37,7 +37,7 @@ import {
   Filter,
   X,
 } from "lucide-react";
-import { getAuditDiff } from "@/lib/audit-diff";
+import { getAuditDiff } from "@/lib/audit/audit-diff";
 
 // ---------------------------------------------------------------------------
 // Types
