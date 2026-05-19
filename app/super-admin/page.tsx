@@ -1,54 +1,16 @@
-import { db } from "@/db";
-import {
-  barangays,
-  residents,
-  documentRequests,
-  blotterCases,
-} from "@/db/schema";
-import { eq, count } from "drizzle-orm";
+import { getSuperAdminStats, getAllBarangays } from "@/db/queries/super-admin/dashboard";
 import { BarangayTable } from "@/components/super-admin/dashboard/barangay-table";
-
-async function getStats() {
-  const [totalBarangays] = await db.select({ count: count() }).from(barangays);
-  const [totalResidents] = await db.select({ count: count() }).from(residents);
-  const [pendingDocs] = await db
-    .select({ count: count() })
-    .from(documentRequests)
-    .where(eq(documentRequests.status, "pending"));
-  const [activeBlotters] = await db
-    .select({ count: count() })
-    .from(blotterCases)
-    .where(eq(blotterCases.status, "filed"));
-
-  return {
-    totalBarangays: totalBarangays.count,
-    totalResidents: totalResidents.count,
-    pendingDocs: pendingDocs.count,
-    activeBlotters: activeBlotters.count,
-  };
-}
-
-async function getAllBarangays() {
-  return db.select().from(barangays).orderBy(barangays.name);
-}
 
 export default async function SuperAdminPage() {
   const [stats, allBarangays] = await Promise.all([
-    getStats(),
+    getSuperAdminStats(),
     getAllBarangays(),
   ]);
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Municipality-wide snapshot across all barangays
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold">Overview</h1>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Barangays"
@@ -72,7 +34,6 @@ export default async function SuperAdminPage() {
         />
       </div>
 
-      {/* Barangay table */}
       <BarangayTable barangays={allBarangays} />
     </div>
   );

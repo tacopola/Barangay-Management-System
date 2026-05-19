@@ -1,47 +1,8 @@
-import { db } from "@/db"
-import { barangays, users, residents } from "@/db/schema"
-import { eq, count, and } from "drizzle-orm"
-import { BarangayListClient } from "@/components/super-admin/barangay_tab/barangay-list-client"
-
-async function getBarangaysWithStats() {
-  const all = await db.select().from(barangays).orderBy(barangays.name)
-
-  const withStats = await Promise.all(
-    all.map(async (b) => {
-      const [adminCount] = await db
-        .select({ count: count() })
-        .from(users)
-        .where(
-          and(
-            eq(users.barangayId, b.id),
-            eq(users.role, "barangay_admin"),
-            eq(users.isActive, true)
-          )
-        )
-
-      const [residentCount] = await db
-        .select({ count: count() })
-        .from(residents)
-        .where(
-          and(
-            eq(residents.barangayId, b.id),
-            eq(residents.isArchived, false)
-          )
-        )
-
-      return {
-        ...b,
-        adminCount: adminCount.count,
-        residentCount: residentCount.count,
-      }
-    })
-  )
-
-  return withStats
-}
+import { getBarangaysWithStats } from "@/db/queries/super-admin/barangay";
+import { BarangayListClient } from "@/components/super-admin/barangay_tab/barangay-list-client";
 
 export default async function BarangaysPage() {
-  const data = await getBarangaysWithStats()
+  const data = await getBarangaysWithStats();
 
   return (
     <div className="p-6 space-y-6">
@@ -54,7 +15,8 @@ export default async function BarangaysPage() {
           Manage all barangays under this municipality.
         </p>
       </div>
+
       <BarangayListClient barangays={data} />
     </div>
-  )
+  );
 }

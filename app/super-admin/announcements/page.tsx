@@ -1,36 +1,9 @@
-import { db } from "@/db";
-import { announcements, barangays, users } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import {
+  getAnnouncements,
+  getBarangays,
+} from "@/db/queries/super-admin/announcement";
+
 import { AnnouncementListClient } from "@/components/super-admin/announcement_tab/announcement-list-client";
-
-async function getAnnouncements() {
-  const data = await db
-    .select({
-      id: announcements.id,
-      title: announcements.title,
-      body: announcements.body,
-      isPinned: announcements.isPinned,
-      expiresAt: announcements.expiresAt,
-      createdAt: announcements.createdAt,
-
-      barangayId: announcements.barangayId,
-      barangayName: barangays.name,
-
-      postedBy: sql<string>`
-      concat(${users.firstName}, ' ', ${users.lastName})
-    `,
-    })
-    .from(announcements)
-    .leftJoin(barangays, eq(announcements.barangayId, barangays.id))
-    .leftJoin(users, eq(announcements.postedById, users.id))
-    .orderBy(desc(announcements.isPinned), desc(announcements.createdAt));
-
-  return data;
-}
-
-async function getBarangays() {
-  return db.select().from(barangays).orderBy(barangays.name);
-}
 
 export default async function AnnouncementsPage() {
   const [announcementData, barangayData] = await Promise.all([
