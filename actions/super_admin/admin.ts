@@ -10,10 +10,6 @@ import { requireRole } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createAuditLog } from "@/lib/audit/audit-log";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
 const createAdminSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string().optional(),
@@ -41,10 +37,6 @@ export type AdminFormState = {
   success?: boolean;
 };
 
-// ---------------------------------------------------------------------------
-// Create admin account
-// ---------------------------------------------------------------------------
-
 export async function createAdminAction(
   _prev: AdminFormState,
   formData: FormData,
@@ -70,10 +62,6 @@ export async function createAdminAction(
     };
   }
 
-  // ---------------------------------------------------------------------------
-  // Create auth user
-  // ---------------------------------------------------------------------------
-
   const { data: authData, error: authError } =
     await supabaseAdmin.auth.admin.createUser({
       email: parsed.data.email,
@@ -92,10 +80,6 @@ export async function createAdminAction(
       error: authError?.message ?? "Failed to create account.",
     };
   }
-
-  // ---------------------------------------------------------------------------
-  // Create public user
-  // ---------------------------------------------------------------------------
 
   try {
     const [createdUser] = await db
@@ -117,10 +101,6 @@ export async function createAdminAction(
         isActive: true,
       })
       .returning();
-
-    // -----------------------------------------------------------------------
-    // Audit log
-    // -----------------------------------------------------------------------
 
     await createAuditLog({
       actorId: actor.id,
@@ -151,10 +131,6 @@ export async function createAdminAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Update admin info
-// ---------------------------------------------------------------------------
-
 export async function updateAdminAction(
   id: string,
   _prev: AdminFormState,
@@ -181,10 +157,6 @@ export async function updateAdminAction(
   }
 
   try {
-    // -----------------------------------------------------------------------
-    // Existing user
-    // -----------------------------------------------------------------------
-
     const existing = await db.query.users.findFirst({
       where: eq(users.id, id),
     });
@@ -194,10 +166,6 @@ export async function updateAdminAction(
         error: "Admin not found.",
       };
     }
-
-    // -----------------------------------------------------------------------
-    // Update
-    // -----------------------------------------------------------------------
 
     await db
       .update(users)
@@ -215,10 +183,6 @@ export async function updateAdminAction(
         updatedAt: new Date(),
       })
       .where(eq(users.id, id));
-
-    // -----------------------------------------------------------------------
-    // Audit log
-    // -----------------------------------------------------------------------
 
     await createAuditLog({
       actorId: actor.id,
@@ -260,10 +224,6 @@ export async function updateAdminAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle active status
-// ---------------------------------------------------------------------------
-
 export async function toggleAdminStatusAction(
   id: string,
   isActive: boolean,
@@ -271,10 +231,6 @@ export async function toggleAdminStatusAction(
   const actor = await requireRole("super_admin");
 
   try {
-    // -----------------------------------------------------------------------
-    // Existing user
-    // -----------------------------------------------------------------------
-
     const existing = await db.query.users.findFirst({
       where: eq(users.id, id),
     });
@@ -285,10 +241,6 @@ export async function toggleAdminStatusAction(
       };
     }
 
-    // -----------------------------------------------------------------------
-    // Update
-    // -----------------------------------------------------------------------
-
     await db
       .update(users)
       .set({
@@ -296,10 +248,6 @@ export async function toggleAdminStatusAction(
         updatedAt: new Date(),
       })
       .where(eq(users.id, id));
-
-    // -----------------------------------------------------------------------
-    // Audit log
-    // -----------------------------------------------------------------------
 
     await createAuditLog({
       actorId: actor.id,
@@ -330,10 +278,6 @@ export async function toggleAdminStatusAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Reset password
-// ---------------------------------------------------------------------------
-
 export async function resetAdminPasswordAction(
   authId: string,
   newPassword: string,
@@ -359,10 +303,6 @@ export async function resetAdminPasswordAction(
   return {};
 }
 
-// ---------------------------------------------------------------------------
-// Delete admin
-// ---------------------------------------------------------------------------
-
 export async function deleteAdminAction(
   id: string,
   authId: string,
@@ -370,10 +310,6 @@ export async function deleteAdminAction(
   const actor = await requireRole("super_admin");
 
   try {
-    // -----------------------------------------------------------------------
-    // Existing user
-    // -----------------------------------------------------------------------
-
     const existing = await db.query.users.findFirst({
       where: eq(users.id, id),
     });
@@ -383,10 +319,6 @@ export async function deleteAdminAction(
         error: "Admin not found.",
       };
     }
-
-    // -----------------------------------------------------------------------
-    // Audit log BEFORE delete
-    // -----------------------------------------------------------------------
 
     await createAuditLog({
       actorId: actor.id,
@@ -400,15 +332,7 @@ export async function deleteAdminAction(
       previousValue: existing,
     });
 
-    // -----------------------------------------------------------------------
-    // Delete db user
-    // -----------------------------------------------------------------------
-
     await db.delete(users).where(eq(users.id, id));
-
-    // -----------------------------------------------------------------------
-    // Delete auth user
-    // -----------------------------------------------------------------------
 
     await supabaseAdmin.auth.admin.deleteUser(authId);
 

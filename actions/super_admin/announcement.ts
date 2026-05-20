@@ -8,9 +8,6 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit/audit-log";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
 
 const announcementSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -26,9 +23,6 @@ export type AnnouncementFormState = {
   success?: boolean;
 };
 
-// ---------------------------------------------------------------------------
-// Create
-// ---------------------------------------------------------------------------
 
 export async function createAnnouncementAction(
   _prev: AnnouncementFormState,
@@ -87,9 +81,6 @@ export async function createAnnouncementAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Update
-// ---------------------------------------------------------------------------
 
 export async function updateAnnouncementAction(
   id: string,
@@ -156,10 +147,6 @@ export async function updateAnnouncementAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle pin
-// ---------------------------------------------------------------------------
-
 export async function togglePinAction(
   id: string,
   isPinned: boolean,
@@ -198,10 +185,6 @@ export async function togglePinAction(
     return { error: "Failed to update pin status." };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
 
 export async function deleteAnnouncementAction(
   id: string,

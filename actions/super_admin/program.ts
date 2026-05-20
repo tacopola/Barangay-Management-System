@@ -8,9 +8,6 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit/audit-log";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
 
 const programSchema = z.object({
   name: z.string().min(2, "Program name is required"),
@@ -27,9 +24,6 @@ export type ProgramFormState = {
   success?: boolean;
 };
 
-// ---------------------------------------------------------------------------
-// Create
-// ---------------------------------------------------------------------------
 
 export async function createProgramAction(
   _prev: ProgramFormState,
@@ -80,9 +74,7 @@ export async function createProgramAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Update
-// ---------------------------------------------------------------------------
+
 
 export async function updateProgramAction(
   id: string,
@@ -141,9 +133,6 @@ export async function updateProgramAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle active
-// ---------------------------------------------------------------------------
 
 export async function toggleProgramStatusAction(
   id: string,
@@ -184,9 +173,6 @@ export async function toggleProgramStatusAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
 
 export async function deleteProgramAction(
   id: string,

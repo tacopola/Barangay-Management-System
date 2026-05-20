@@ -8,10 +8,6 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
 const residentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string().optional(),
@@ -55,10 +51,6 @@ export type ResidentFormState = {
   residentId?: string;
 };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function parseCheckbox(formData: FormData, key: string) {
   return formData.get(key) === "true";
 }
@@ -67,10 +59,6 @@ function parseOptional(formData: FormData, key: string) {
   const val = formData.get(key) as string;
   return val || undefined;
 }
-
-// ---------------------------------------------------------------------------
-// Create resident
-// ---------------------------------------------------------------------------
 
 export async function createResidentAction(
   _prev: ResidentFormState,
@@ -199,10 +187,6 @@ export async function createResidentAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Update resident
-// ---------------------------------------------------------------------------
-
 export async function updateResidentAction(
   id: string,
   _prev: ResidentFormState,
@@ -263,10 +247,6 @@ export async function updateResidentAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle verify
-// ---------------------------------------------------------------------------
-
 export async function toggleVerifyResidentAction(
   id: string,
   isVerified: boolean,
@@ -289,10 +269,6 @@ export async function toggleVerifyResidentAction(
     return { error: "Failed to update verification status." };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Archive resident (soft delete)
-// ---------------------------------------------------------------------------
 
 export async function archiveResidentAction(
   id: string,

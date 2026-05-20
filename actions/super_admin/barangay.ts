@@ -9,9 +9,6 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit/audit-log";
 
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
 
 const barangaySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,9 +26,6 @@ export type BarangayFormState = {
   success?: boolean;
 };
 
-// ---------------------------------------------------------------------------
-// Create
-// ---------------------------------------------------------------------------
 
 export async function createBarangayAction(
   _prev: BarangayFormState,
@@ -93,10 +87,6 @@ export async function createBarangayAction(
     };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Update
-// ---------------------------------------------------------------------------
 
 export async function updateBarangayAction(
   id: string,
@@ -174,10 +164,6 @@ export async function updateBarangayAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle active status
-// ---------------------------------------------------------------------------
-
 export async function toggleBarangayStatusAction(
   id: string,
   isActive: boolean,
@@ -228,9 +214,6 @@ export async function toggleBarangayStatusAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
 
 export async function deleteBarangayAction(
   id: string,

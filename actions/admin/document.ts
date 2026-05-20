@@ -7,10 +7,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
 const requestSchema = z.object({
   docType: z.enum([
     "barangay_clearance",
@@ -30,10 +26,6 @@ export type DocRequestFormState = {
   requestId?: string;
 };
 
-// ---------------------------------------------------------------------------
-// Generate control number
-// ---------------------------------------------------------------------------
-
 function generateControlNumber(docType: string, barangayId: string) {
   const prefix: Record<string, string> = {
     barangay_clearance: "BC",
@@ -49,10 +41,6 @@ function generateControlNumber(docType: string, barangayId: string) {
   const rand = Math.floor(Math.random() * 9000 + 1000);
   return `${prefix[docType] ?? "DOC"}-${year}${month}-${rand}`;
 }
-
-// ---------------------------------------------------------------------------
-// Resident: request a document
-// ---------------------------------------------------------------------------
 
 export async function requestDocumentAction(
   _prev: DocRequestFormState,
@@ -72,7 +60,6 @@ export async function requestDocumentAction(
     };
   }
 
-  // Get resident record
   const [resident] = await db
     .select()
     .from(residents)
@@ -107,10 +94,6 @@ export async function requestDocumentAction(
     return { error: "Failed to submit request. Please try again." };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Admin: request on behalf of walk-in resident
-// ---------------------------------------------------------------------------
 
 export async function adminRequestDocumentAction(
   _prev: DocRequestFormState,
@@ -160,10 +143,6 @@ export async function adminRequestDocumentAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Admin: approve request
-// ---------------------------------------------------------------------------
-
 export async function approveDocumentAction(
   id: string,
 ): Promise<{ error?: string }> {
@@ -192,10 +171,6 @@ export async function approveDocumentAction(
     return { error: "Failed to approve request." };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Admin: reject request
-// ---------------------------------------------------------------------------
 
 export async function rejectDocumentAction(
   id: string,
@@ -231,10 +206,6 @@ export async function rejectDocumentAction(
     return { error: "Failed to reject request." };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Admin: mark as released
-// ---------------------------------------------------------------------------
 
 export async function releaseDocumentAction(
   id: string,

@@ -7,10 +7,6 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { requireRole } from "@/lib/auth"
 
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
 const householdSchema = z.object({
   houseNumber: z.string().optional(),
   streetPurok: z.string().min(1, "Street / Purok is required"),
@@ -23,9 +19,6 @@ export type HouseholdFormState = {
   success?: boolean
 }
 
-// ---------------------------------------------------------------------------
-// Create
-// ---------------------------------------------------------------------------
 
 export async function createHouseholdAction(
   _prev: HouseholdFormState,
@@ -79,10 +72,6 @@ export async function createHouseholdAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Update
-// ---------------------------------------------------------------------------
-
 export async function updateHouseholdAction(
   id: string,
   _prev: HouseholdFormState,
@@ -123,10 +112,6 @@ export async function updateHouseholdAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
-
 export async function deleteHouseholdAction(
   id: string
 ): Promise<{ error?: string }> {
@@ -147,10 +132,6 @@ export async function deleteHouseholdAction(
     return { error: "Failed to delete household." }
   }
 }
-
-// ---------------------------------------------------------------------------
-// Assign resident to household
-// ---------------------------------------------------------------------------
 
 export async function assignResidentToHouseholdAction(
   residentId: string,

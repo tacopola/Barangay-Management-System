@@ -7,10 +7,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
 const officialSchema = z.object({
   residentId: z
     .string()
@@ -38,10 +34,6 @@ export type OfficialFormState = {
   officialId?: string;
 };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function parseOptional(formData: FormData, key: string) {
   const val = formData.get(key) as string;
   return val || undefined;
@@ -50,10 +42,6 @@ function parseOptional(formData: FormData, key: string) {
 function parseCheckbox(formData: FormData, key: string) {
   return formData.get(key) === "true";
 }
-
-// ---------------------------------------------------------------------------
-// Create
-// ---------------------------------------------------------------------------
 
 export async function createOfficialAction(
   _prev: OfficialFormState,
