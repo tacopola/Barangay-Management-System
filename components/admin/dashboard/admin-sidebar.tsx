@@ -101,6 +101,7 @@ export function AdminSidebar({ user }: { user: AuthUser }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={true}
                     className={cn(
                       "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors",
                       active
