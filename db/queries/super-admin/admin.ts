@@ -27,7 +27,7 @@ export const getAdmins = unstable_cache(
   },
   ["admins-list"],
   {
-    revalidate: 60, 
+    revalidate: 60,
   },
 );
 
@@ -44,6 +44,6 @@ export const getAllBarangays = unstable_cache(
   },
   ["active-barangays"],
   {
-    revalidate: 300, 
+    revalidate: 300,
   },
 );
