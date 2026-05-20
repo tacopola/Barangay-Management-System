@@ -1,43 +1,46 @@
-"use server"
+"use server";
 
-import { db } from "@/db"
-import { households, residents } from "@/db/schema"
-import { eq, and } from "drizzle-orm"
-import { revalidatePath } from "next/cache"
-import { z } from "zod"
-import { requireRole } from "@/lib/auth"
+import { db } from "@/db";
+import { households, residents } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireBarangayAdmin } from "@/lib/auth-helper";
 
 const householdSchema = z.object({
   houseNumber: z.string().optional(),
   streetPurok: z.string().min(1, "Street / Purok is required"),
-  headResidentId: z.string().uuid("Please select a head of household").optional().or(z.literal("")),
-})
+  headResidentId: z
+    .string()
+    .uuid("Please select a head of household")
+    .optional()
+    .or(z.literal("")),
+});
 
 export type HouseholdFormState = {
-  error?: string
-  fieldErrors?: Record<string, string>
-  success?: boolean
-}
-
+  error?: string;
+  fieldErrors?: Record<string, string>;
+  success?: boolean;
+};
 
 export async function createHouseholdAction(
   _prev: HouseholdFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<HouseholdFormState> {
-  const admin = await requireRole("barangay_admin")
-  const barangayId = admin.barangayId!
+  const { admin } = await requireBarangayAdmin();
+  const barangayId = admin.barangayId!;
 
   const raw = {
-    houseNumber: formData.get("houseNumber") as string || undefined,
+    houseNumber: (formData.get("houseNumber") as string) || undefined,
     streetPurok: formData.get("streetPurok") as string,
-    headResidentId: formData.get("headResidentId") as string || undefined,
-  }
+    headResidentId: (formData.get("headResidentId") as string) || undefined,
+  };
 
-  const parsed = householdSchema.safeParse(raw)
+  const parsed = householdSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    }
+    };
   }
 
   try {
@@ -49,7 +52,7 @@ export async function createHouseholdAction(
         streetPurok: parsed.data.streetPurok,
         headResidentId: parsed.data.headResidentId || null,
       })
-      .returning({ id: households.id })
+      .returning({ id: households.id });
 
     // If head resident is set, link them to this household
     if (parsed.data.headResidentId) {
@@ -59,37 +62,36 @@ export async function createHouseholdAction(
         .where(
           and(
             eq(residents.id, parsed.data.headResidentId),
-            eq(residents.barangayId, barangayId)
-          )
-        )
+            eq(residents.barangayId, barangayId),
+          ),
+        );
     }
 
-    revalidatePath("/admin/households")
-    return { success: true }
+    revalidatePath("/admin/households");
+    return { success: true };
   } catch (e) {
-      console.error("Error creating household:", e)
-    return { error: "Failed to create household. Please try again." }
+    console.error("Error creating household:", e);
+    return { error: "Failed to create household. Please try again." };
   }
 }
 
 export async function updateHouseholdAction(
   id: string,
   _prev: HouseholdFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<HouseholdFormState> {
-
-
+  const { admin } = await requireBarangayAdmin();
   const raw = {
-    houseNumber: formData.get("houseNumber") as string || undefined,
+    houseNumber: (formData.get("houseNumber") as string) || undefined,
     streetPurok: formData.get("streetPurok") as string,
-    headResidentId: formData.get("headResidentId") as string || undefined,
-  }
+    headResidentId: (formData.get("headResidentId") as string) || undefined,
+  };
 
-  const parsed = householdSchema.safeParse(raw)
+  const parsed = householdSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    }
+    };
   }
 
   try {
@@ -101,44 +103,43 @@ export async function updateHouseholdAction(
         headResidentId: parsed.data.headResidentId || null,
         updatedAt: new Date(),
       })
-      .where(eq(households.id, id))
+      .where(eq(households.id, id));
 
-    revalidatePath("/admin/households")
-    revalidatePath(`/admin/households/${id}`)
-    return { success: true }
+    revalidatePath("/admin/households");
+    revalidatePath(`/admin/households/${id}`);
+    return { success: true };
   } catch (e) {
-    console.error("Error updating household:", e)
-    return { error: "Failed to update household. Please try again." }
+    console.error("Error updating household:", e);
+    return { error: "Failed to update household. Please try again." };
   }
 }
 
 export async function deleteHouseholdAction(
-  id: string
+  id: string,
 ): Promise<{ error?: string }> {
-
+  const { admin } = await requireBarangayAdmin();
   try {
     // Unlink residents first
     await db
       .update(residents)
       .set({ householdId: null, updatedAt: new Date() })
-      .where(eq(residents.householdId, id))
+      .where(eq(residents.householdId, id));
 
-    await db.delete(households).where(eq(households.id, id))
+    await db.delete(households).where(eq(households.id, id));
 
-    revalidatePath("/admin/households")
-    return {}
+    revalidatePath("/admin/households");
+    return {};
   } catch (e) {
-    console.error("Error deleting household:", e)
-    return { error: "Failed to delete household." }
+    console.error("Error deleting household:", e);
+    return { error: "Failed to delete household." };
   }
 }
 
 export async function assignResidentToHouseholdAction(
   residentId: string,
-  householdId: string | null
+  householdId: string | null,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin")
-
+  const { admin } = await requireBarangayAdmin();
   try {
     await db
       .update(residents)
@@ -146,14 +147,14 @@ export async function assignResidentToHouseholdAction(
       .where(
         and(
           eq(residents.id, residentId),
-          eq(residents.barangayId, admin.barangayId!)
-        )
-      )
+          eq(residents.barangayId, admin.barangayId!),
+        ),
+      );
 
-    revalidatePath("/admin/households")
-    return {}
+    revalidatePath("/admin/households");
+    return {};
   } catch (e) {
-    console.error("Error assigning resident to household:", e)
-    return { error: "Failed to assign resident." }
+    console.error("Error assigning resident to household:", e);
+    return { error: "Failed to assign resident." };
   }
 }

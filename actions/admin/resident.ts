@@ -5,8 +5,8 @@ import { residents, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { requireBarangayAdmin } from "@/lib/auth-helper";
 
 const residentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -64,7 +64,7 @@ export async function createResidentAction(
   _prev: ResidentFormState,
   formData: FormData,
 ): Promise<ResidentFormState> {
-  const admin = await requireRole("barangay_admin");
+  const { admin } = await requireBarangayAdmin();
   const barangayId = admin.barangayId!;
 
   const createPortalAccount = parseCheckbox(formData, "createPortalAccount");
@@ -192,8 +192,7 @@ export async function updateResidentAction(
   _prev: ResidentFormState,
   formData: FormData,
 ): Promise<ResidentFormState> {
-  const admin = await requireRole("barangay_admin");
-
+  const { admin } = await requireBarangayAdmin();
   const raw = {
     firstName: formData.get("firstName") as string,
     middleName: parseOptional(formData, "middleName"),
@@ -251,8 +250,7 @@ export async function toggleVerifyResidentAction(
   id: string,
   isVerified: boolean,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
-
+  const { admin } = await requireBarangayAdmin();
   try {
     await db
       .update(residents)
@@ -274,8 +272,7 @@ export async function archiveResidentAction(
   id: string,
   isArchived: boolean,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
-
+  const { admin } = await requireBarangayAdmin();
   try {
     await db
       .update(residents)

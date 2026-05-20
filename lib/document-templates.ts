@@ -225,10 +225,7 @@ function formatAge(birthDate: string) {
 
   const monthDiff = today.getMonth() - birth.getMonth();
 
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birth.getDate())
-  ) {
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
 
@@ -304,7 +301,7 @@ function documentWrapper(
   title: string,
   body: string,
   data: DocumentData,
-  residentName: string
+  residentName: string,
 ) {
   return `
 <!DOCTYPE html>
@@ -359,9 +356,7 @@ function documentWrapper(
 // BARANGAY CLEARANCE
 // ---------------------------------------------------------------------------
 
-export function generateBarangayClearance(
-  data: DocumentData
-): string {
+export function generateBarangayClearance(data: DocumentData): string {
   const name = fullName(data.resident);
   const age = formatAge(data.resident.birthDate);
   const issued = formatDate(data.issuedAt);
@@ -400,21 +395,14 @@ export function generateBarangayClearance(
     </p>
   `;
 
-  return documentWrapper(
-    "Barangay Clearance",
-    body,
-    data,
-    name
-  );
+  return documentWrapper("Barangay Clearance", body, data, name);
 }
 
 // ---------------------------------------------------------------------------
 // CERTIFICATE OF RESIDENCY
 // ---------------------------------------------------------------------------
 
-export function generateCertificateOfResidency(
-  data: DocumentData
-): string {
+export function generateCertificateOfResidency(data: DocumentData): string {
   const name = fullName(data.resident);
   const age = formatAge(data.resident.birthDate);
   const issued = formatDate(data.issuedAt);
@@ -428,10 +416,10 @@ export function generateCertificateOfResidency(
       This is to certify that
       <span class="name">${name}</span>,
       ${age} years of age, is a bonafide resident of
-      <strong>${data.resident.address}</strong>,
+      <strong>
       Barangay ${data.barangay.name},
       ${data.barangay.municipality},
-      ${data.barangay.province}, Philippines.
+      ${data.barangay.province} Philippines</strong>.
     </p>
 
     <p class="body-text">
@@ -447,21 +435,14 @@ export function generateCertificateOfResidency(
     </p>
   `;
 
-  return documentWrapper(
-    "Certificate of Residency",
-    body,
-    data,
-    name
-  );
+  return documentWrapper("Certificate of Residency", body, data, name);
 }
 
 // ---------------------------------------------------------------------------
 // CERTIFICATE OF INDIGENCY
 // ---------------------------------------------------------------------------
 
-export function generateCertificateOfIndigency(
-  data: DocumentData
-): string {
+export function generateCertificateOfIndigency(data: DocumentData): string {
   const name = fullName(data.resident);
   const age = formatAge(data.resident.birthDate);
   const issued = formatDate(data.issuedAt);
@@ -495,21 +476,14 @@ export function generateCertificateOfIndigency(
     </p>
   `;
 
-  return documentWrapper(
-    "Certificate of Indigency",
-    body,
-    data,
-    name
-  );
+  return documentWrapper("Certificate of Indigency", body, data, name);
 }
 
 // ---------------------------------------------------------------------------
 // GOOD MORAL CERTIFICATE
 // ---------------------------------------------------------------------------
 
-export function generateGoodMoralCertificate(
-  data: DocumentData
-): string {
+export function generateGoodMoralCertificate(data: DocumentData): string {
   const name = fullName(data.resident);
   const age = formatAge(data.resident.birthDate);
   const issued = formatDate(data.issuedAt);
@@ -554,7 +528,7 @@ export function generateGoodMoralCertificate(
     "Certificate of Good Moral Character",
     body,
     data,
-    name
+    name,
   );
 }
 
@@ -562,9 +536,7 @@ export function generateGoodMoralCertificate(
 // BUSINESS CLEARANCE
 // ---------------------------------------------------------------------------
 
-export function generateBusinessClearance(
-  data: DocumentData
-): string {
+export function generateBusinessClearance(data: DocumentData): string {
   const name = fullName(data.resident);
   const issued = formatDate(data.issuedAt);
 
@@ -598,12 +570,7 @@ export function generateBusinessClearance(
     </p>
   `;
 
-  return documentWrapper(
-    "Barangay Business Clearance",
-    body,
-    data,
-    name
-  );
+  return documentWrapper("Barangay Business Clearance", body, data, name);
 }
 
 // ---------------------------------------------------------------------------

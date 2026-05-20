@@ -5,9 +5,8 @@ import { programs } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit/audit-log";
-
+import { requireSuperAdmin } from "@/lib/auth-helper";
 
 const programSchema = z.object({
   name: z.string().min(2, "Program name is required"),
@@ -29,15 +28,13 @@ export async function createProgramAction(
   _prev: ProgramFormState,
   formData: FormData,
 ): Promise<ProgramFormState> {
-  const user = await requireRole("super_admin");
-
   const raw = {
     name: formData.get("name") as string,
     type: formData.get("type") as string,
     barangayId: formData.get("barangayId") as string,
     description: (formData.get("description") as string) || undefined,
   };
-
+const { superadmin } = await requireSuperAdmin();
   const parsed = programSchema.safeParse(raw);
   if (!parsed.success) {
     return {
@@ -58,7 +55,7 @@ export async function createProgramAction(
       .returning();
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: parsed.data.barangayId,
       action: "create",
       tableName: "programs",
@@ -81,8 +78,7 @@ export async function updateProgramAction(
   _prev: ProgramFormState,
   formData: FormData,
 ): Promise<ProgramFormState> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   const raw = {
     name: formData.get("name") as string,
     type: formData.get("type") as string,
@@ -116,7 +112,7 @@ export async function updateProgramAction(
       .returning();
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: parsed.data.barangayId,
       action: "update",
       tableName: "programs",
@@ -138,8 +134,7 @@ export async function toggleProgramStatusAction(
   id: string,
   isActive: boolean,
 ): Promise<{ error?: string }> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   try {
     const [existing] = await db
       .select()
@@ -156,7 +151,7 @@ export async function toggleProgramStatusAction(
       .returning();
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: existing.barangayId,
       action: "update",
       tableName: "programs",
@@ -177,8 +172,7 @@ export async function toggleProgramStatusAction(
 export async function deleteProgramAction(
   id: string,
 ): Promise<{ error?: string }> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   try {
     const [existing] = await db
       .select()
@@ -188,7 +182,7 @@ export async function deleteProgramAction(
     await db.delete(programs).where(eq(programs.id, id));
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: existing?.barangayId ?? null,
       action: "delete",
       tableName: "programs",

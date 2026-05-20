@@ -105,6 +105,8 @@ export function DocumentQueueClient({
   );
   const [rejectReason, setRejectReason] = useState("");
   const [orNumber, setOrNumber] = useState("");
+  const [releaseControlInput, setReleaseControlInput] = useState("");
+  const [releaseError, setReleaseError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const filtered = requests.filter((r) => {
@@ -154,6 +156,11 @@ export function DocumentQueueClient({
 
   function handleRelease() {
     if (!selectedRequest) return;
+    if (releaseControlInput !== (selectedRequest.controlNumber || "")) {
+      setReleaseError("Control Number does not match.");
+      return;
+    }
+    setReleaseError("");
     startTransition(async () => {
       const res = await releaseDocumentAction(selectedRequest.id, orNumber);
       if (res.error) toast.error(res.error);
@@ -161,6 +168,7 @@ export function DocumentQueueClient({
         toast.success("Document released.");
         setReleaseOpen(false);
         setOrNumber("");
+        setReleaseControlInput("");
       }
       router.refresh();
     });
@@ -487,31 +495,52 @@ export function DocumentQueueClient({
       </Dialog>
 
       {/* Release dialog */}
-      <Dialog open={releaseOpen} onOpenChange={setReleaseOpen}>
+      <Dialog
+        open={releaseOpen}
+        onOpenChange={(open) => {
+          setReleaseOpen(open);
+          if (!open) {
+            setReleaseControlInput("");
+            setReleaseError("");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-sm p-8">
           <DialogHeader className="mb-4">
             <DialogTitle>Release Document</DialogTitle>
             <DialogDescription>
-              Mark this document as released. Optionally enter the official
-              receipt number.
+              To release, enter the correct Control Number for this document.
+              Optionally enter the official receipt number.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <Label className="text-xs font-medium">
-                OR Number (optional)
+                Control Number <span className="text-destructive">*</span>
               </Label>
               <Input
-                placeholder="e.g. OR-2025-001"
-                value={orNumber}
-                onChange={(e) => setOrNumber(e.target.value)}
+                placeholder="Enter Control Number"
+                value={releaseControlInput}
+                onChange={(e) => setReleaseControlInput(e.target.value)}
                 className="h-9 text-sm"
+                autoFocus
               />
+              {selectedRequest?.controlNumber && (
+                <p className="text-[10px] text-muted-foreground">
+                  Expected:{" "}
+                  <span className="font-mono">
+                    {selectedRequest.controlNumber}
+                  </span>
+                </p>
+              )}
             </div>
+            {releaseError && (
+              <p className="text-xs text-destructive">{releaseError}</p>
+            )}
             <Button
               className="w-full"
               onClick={handleRelease}
-              disabled={isPending}
+              disabled={isPending || !releaseControlInput}
             >
               <Send className="h-4 w-4 mr-2" /> Confirm Release
             </Button>
@@ -521,10 +550,6 @@ export function DocumentQueueClient({
     </>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Walk-in request form
-// ---------------------------------------------------------------------------
 
 function WalkInRequestForm({
   residents,

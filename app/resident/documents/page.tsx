@@ -1,28 +1,10 @@
-import { requireRole } from "@/lib/auth"
-import { db } from "@/db"
-import { documentRequests, residents } from "@/db/schema"
-import { eq, desc } from "drizzle-orm"
-import { ResidentDocumentsClient } from "@/components/resident/resident-documents-client"
-
-async function getMyRequests(userId: string) {
-  const [resident] = await db
-    .select({ id: residents.id })
-    .from(residents)
-    .where(eq(residents.userId, userId))
-    .limit(1)
-
-  if (!resident) return []
-
-  return db
-    .select()
-    .from(documentRequests)
-    .where(eq(documentRequests.residentId, resident.id))
-    .orderBy(desc(documentRequests.createdAt))
-}
+import { requireResident } from "@/lib/auth-helper";
+import { getMyRequests } from "@/db/queries/resident/document";
+import { ResidentDocumentsClient } from "@/components/resident/resident-documents-client";
 
 export default async function ResidentDocumentsPage() {
-  const user = await requireRole("resident")
-  const requests = await getMyRequests(user.id)
+  const { resident } = await requireResident();
+  const requests = await getMyRequests(resident.id);
 
   return (
     <div className="px-4 py-5 space-y-5">
@@ -35,7 +17,8 @@ export default async function ResidentDocumentsPage() {
           Request and track your barangay documents.
         </p>
       </div>
+
       <ResidentDocumentsClient requests={requests} />
     </div>
-  )
+  );
 }

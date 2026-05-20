@@ -5,7 +5,7 @@ import { barangayOfficials } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth";
+import { requireBarangayAdmin } from "@/lib/auth-helper";
 
 const officialSchema = z.object({
   residentId: z
@@ -47,9 +47,8 @@ export async function createOfficialAction(
   _prev: OfficialFormState,
   formData: FormData,
 ): Promise<OfficialFormState> {
-  const admin = await requireRole("barangay_admin");
+  const { admin } = await requireBarangayAdmin();
   const barangayId = admin.barangayId!;
-
   const raw = {
     residentId: parseOptional(formData, "residentId"),
     position: formData.get("position") as string,
@@ -86,17 +85,12 @@ export async function createOfficialAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Update
-// ---------------------------------------------------------------------------
-
 export async function updateOfficialAction(
   id: string,
   _prev: OfficialFormState,
   formData: FormData,
 ): Promise<OfficialFormState> {
-  const admin = await requireRole("barangay_admin");
-
+  const { admin } = await requireBarangayAdmin();
   const raw = {
     residentId: parseOptional(formData, "residentId"),
     position: formData.get("position") as string,
@@ -138,16 +132,11 @@ export async function updateOfficialAction(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Toggle active
-// ---------------------------------------------------------------------------
-
 export async function toggleOfficialActiveAction(
   id: string,
   isActive: boolean,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
-
+  const { admin } = await requireBarangayAdmin();
   try {
     await db
       .update(barangayOfficials)
@@ -166,16 +155,10 @@ export async function toggleOfficialActiveAction(
     return { error: "Failed to update official status." };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
-
 export async function deleteOfficialAction(
   id: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
-
+  const { admin } = await requireBarangayAdmin();
   try {
     await db
       .delete(barangayOfficials)

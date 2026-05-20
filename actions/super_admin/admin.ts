@@ -5,10 +5,9 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
-import { requireRole } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createAuditLog } from "@/lib/audit/audit-log";
+import { requireSuperAdmin } from "@/lib/auth-helper";
 
 const createAdminSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -41,8 +40,7 @@ export async function createAdminAction(
   _prev: AdminFormState,
   formData: FormData,
 ): Promise<AdminFormState> {
-  const actor = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   const raw = {
     firstName: formData.get("firstName") as string,
     middleName: (formData.get("middleName") as string) || undefined,
@@ -103,8 +101,8 @@ export async function createAdminAction(
       .returning();
 
     await createAuditLog({
-      actorId: actor.id,
-      barangayId: actor.barangayId,
+      actorId: superadmin.id,
+      barangayId: superadmin.barangayId,
 
       action: "create",
 
@@ -136,8 +134,7 @@ export async function updateAdminAction(
   _prev: AdminFormState,
   formData: FormData,
 ): Promise<AdminFormState> {
-  const actor = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   const raw = {
     firstName: formData.get("firstName") as string,
     middleName: (formData.get("middleName") as string) || undefined,
@@ -185,8 +182,8 @@ export async function updateAdminAction(
       .where(eq(users.id, id));
 
     await createAuditLog({
-      actorId: actor.id,
-      barangayId: actor.barangayId,
+      actorId: superadmin.id,
+      barangayId: superadmin.barangayId,
 
       action: "update",
 
@@ -228,8 +225,7 @@ export async function toggleAdminStatusAction(
   id: string,
   isActive: boolean,
 ): Promise<{ error?: string }> {
-  const actor = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   try {
     const existing = await db.query.users.findFirst({
       where: eq(users.id, id),
@@ -250,8 +246,8 @@ export async function toggleAdminStatusAction(
       .where(eq(users.id, id));
 
     await createAuditLog({
-      actorId: actor.id,
-      barangayId: actor.barangayId,
+      actorId: superadmin.id,
+      barangayId: superadmin.barangayId,
 
       action: "update",
 
@@ -282,8 +278,6 @@ export async function resetAdminPasswordAction(
   authId: string,
   newPassword: string,
 ): Promise<{ error?: string }> {
-  await requireRole("super_admin");
-
   if (newPassword.length < 8) {
     return {
       error: "Password must be at least 8 characters.",
@@ -307,8 +301,7 @@ export async function deleteAdminAction(
   id: string,
   authId: string,
 ): Promise<{ error?: string }> {
-  const actor = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   try {
     const existing = await db.query.users.findFirst({
       where: eq(users.id, id),
@@ -321,8 +314,8 @@ export async function deleteAdminAction(
     }
 
     await createAuditLog({
-      actorId: actor.id,
-      barangayId: actor.barangayId,
+      actorId: superadmin.id,
+      barangayId: superadmin.barangayId,
 
       action: "delete",
 

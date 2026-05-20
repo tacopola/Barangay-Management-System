@@ -6,6 +6,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
+import { requireBarangayAdmin, requireResident } from "@/lib/auth-helper";
 
 const requestSchema = z.object({
   docType: z.enum([
@@ -46,7 +47,7 @@ export async function requestDocumentAction(
   _prev: DocRequestFormState,
   formData: FormData,
 ): Promise<DocRequestFormState> {
-  const user = await requireRole("resident");
+  const { resident: user, barangayId } = await requireResident();
 
   const raw = {
     docType: formData.get("docType") as string,
@@ -68,16 +69,13 @@ export async function requestDocumentAction(
 
   if (!resident) return { error: "Resident record not found." };
 
-  const controlNumber = generateControlNumber(
-    parsed.data.docType,
-    user.barangayId!,
-  );
+  const controlNumber = generateControlNumber(parsed.data.docType, barangayId);
 
   try {
     const [newRequest] = await db
       .insert(documentRequests)
       .values({
-        barangayId: user.barangayId!,
+        barangayId,
         residentId: resident.id,
         requestedById: user.id,
         docType: parsed.data.docType,
@@ -99,7 +97,7 @@ export async function adminRequestDocumentAction(
   _prev: DocRequestFormState,
   formData: FormData,
 ): Promise<DocRequestFormState> {
-  const admin = await requireRole("barangay_admin");
+  const { admin } = await requireBarangayAdmin();
 
   const residentId = formData.get("residentId") as string;
   const raw = {
@@ -146,7 +144,7 @@ export async function adminRequestDocumentAction(
 export async function approveDocumentAction(
   id: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
+  const { admin } = await requireBarangayAdmin();
 
   try {
     await db
@@ -176,7 +174,7 @@ export async function rejectDocumentAction(
   id: string,
   reason: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
+  const { admin } = await requireBarangayAdmin();
 
   if (!reason || reason.length < 5) {
     return { error: "Please provide a rejection reason." };
@@ -211,7 +209,7 @@ export async function releaseDocumentAction(
   id: string,
   orNumber: string,
 ): Promise<{ error?: string }> {
-  const admin = await requireRole("barangay_admin");
+  const { admin } = await requireBarangayAdmin();
 
   try {
     await db

@@ -5,10 +5,8 @@ import { barangays } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
-import { requireRole } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit/audit-log";
-
+import { requireSuperAdmin } from "@/lib/auth-helper";
 
 const barangaySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -31,8 +29,7 @@ export async function createBarangayAction(
   _prev: BarangayFormState,
   formData: FormData,
 ): Promise<BarangayFormState> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   const raw = {
     name: formData.get("name") as string,
     municipality: formData.get("municipality") as string,
@@ -67,7 +64,7 @@ export async function createBarangayAction(
       .returning();
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: null,
       action: "create",
       tableName: "barangays",
@@ -93,8 +90,7 @@ export async function updateBarangayAction(
   _prev: BarangayFormState,
   formData: FormData,
 ): Promise<BarangayFormState> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   const raw = {
     name: formData.get("name") as string,
     municipality: formData.get("municipality") as string,
@@ -141,7 +137,7 @@ export async function updateBarangayAction(
       .returning();
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: null,
       action: "update",
       tableName: "barangays",
@@ -168,8 +164,7 @@ export async function toggleBarangayStatusAction(
   id: string,
   isActive: boolean,
 ): Promise<{ error?: string }> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   try {
     const [existingBarangay] = await db
       .select()
@@ -192,7 +187,7 @@ export async function toggleBarangayStatusAction(
       .returning();
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: null,
       action: "update",
       tableName: "barangays",
@@ -218,8 +213,7 @@ export async function toggleBarangayStatusAction(
 export async function deleteBarangayAction(
   id: string,
 ): Promise<{ error?: string }> {
-  const user = await requireRole("super_admin");
-
+  const { superadmin } = await requireSuperAdmin();
   try {
     const [existingBarangay] = await db
       .select()
@@ -235,7 +229,7 @@ export async function deleteBarangayAction(
     await db.delete(barangays).where(eq(barangays.id, id));
 
     await createAuditLog({
-      actorId: user.id,
+      actorId: superadmin.id,
       barangayId: null,
       action: "delete",
       tableName: "barangays",
