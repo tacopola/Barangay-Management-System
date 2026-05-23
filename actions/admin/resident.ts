@@ -7,19 +7,17 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireBarangayAdmin } from "@/lib/auth-helper";
+import { sexEnum, civilStatusEnum } from "@/db/schema/enums";
 
 const residentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string().optional(),
   lastName: z.string().min(1, "Last name is required"),
   suffix: z.string().optional(),
-  sex: z.enum(["male", "female"], "Sex is required"),
+  sex: z.enum(sexEnum.enumValues, "Sex is required"),
   birthDate: z.string().min(1, "Birth date is required"),
   birthPlace: z.string().optional(),
-  civilStatus: z.enum(
-    ["single", "married", "widowed", "separated", "annulled"],
-    "Civil status is required",
-  ),
+  civilStatus: z.enum(civilStatusEnum.enumValues, "Civil status is required"),
   nationality: z.string().optional(),
   religion: z.string().optional(),
   occupation: z.string().optional(),

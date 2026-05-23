@@ -6,6 +6,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireBarangayAdmin } from "@/lib/auth-helper";
+import { officialPositionEnum } from "@/db/schema/enums";
 
 const officialSchema = z.object({
   residentId: z
@@ -13,15 +14,9 @@ const officialSchema = z.object({
     .uuid("Please select a resident")
     .optional()
     .or(z.literal("")),
-  position: z.enum([
-    "punong_barangay",
-    "kagawad",
-    "sk_chairperson",
-    "sk_kagawad",
-    "barangay_secretary",
-    "barangay_treasurer",
-    "tanod",
-  ]),
+  position: z.enum(officialPositionEnum.enumValues, {
+    message: "Position is required",
+  }),
   termStart: z.string().min(1, "Term start date is required"),
   termEnd: z.string().optional(),
   isActive: z.boolean().default(true),

@@ -5,18 +5,13 @@ import { documentRequests, residents } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth";
+import { docTypeEnum } from "@/db/schema/enums";
 import { requireBarangayAdmin, requireResident } from "@/lib/auth-helper";
 
 const requestSchema = z.object({
-  docType: z.enum([
-    "barangay_clearance",
-    "certificate_of_residency",
-    "certificate_of_indigency",
-    "barangay_id",
-    "business_clearance",
-    "good_moral_certificate",
-  ]),
+  docType: z.enum(docTypeEnum.enumValues, {
+    message: "Document type is required",
+  }),
   purpose: z.string().min(5, "Purpose must be at least 5 characters"),
 });
 

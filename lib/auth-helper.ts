@@ -1,4 +1,3 @@
-
 import { requireRole } from "@/lib/auth";
 
 export async function requireSuperAdmin() {
@@ -8,7 +7,6 @@ export async function requireSuperAdmin() {
     superadmin,
   };
 }
-
 
 export async function requireBarangayAdmin() {
   const admin = await requireRole("barangay_admin");
@@ -22,7 +20,6 @@ export async function requireBarangayAdmin() {
     barangayId: admin.barangayId,
   };
 }
-
 
 export async function requireResident() {
   const resident = await requireRole("resident");

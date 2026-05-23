@@ -1,14 +1,17 @@
-import { requireBarangayAdmin } from "@/lib/auth-helper"
-import { getBlotterCases, getResidentsForBlotter } from "@/db/queries/admin/blotter"
-import { BlotterListClient } from "@/components/admin/blotter_tab/blotter-list-client"
+import { requireBarangayAdmin } from "@/lib/auth-helper";
+import {
+  getBlotterCases,
+  getResidentsForBlotter,
+} from "@/db/queries/admin/blotter";
+import { BlotterListClient } from "@/components/admin/blotter_tab/blotter-list-client";
 
 export default async function BlotterPage() {
-  const { barangayId } = await requireBarangayAdmin()
+  const { barangayId } = await requireBarangayAdmin();
 
   const [cases, residentsList] = await Promise.all([
     getBlotterCases(barangayId),
     getResidentsForBlotter(barangayId),
-  ])
+  ]);
 
   return (
     <div className="p-6 space-y-6">
@@ -23,5 +26,5 @@ export default async function BlotterPage() {
       </div>
       <BlotterListClient cases={cases} residents={residentsList} />
     </div>
-  )
+  );
 }

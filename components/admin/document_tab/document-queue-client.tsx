@@ -334,7 +334,7 @@ export function DocumentQueueClient({
                       )}
                     </td>
                     <td className="px-5 py-3.5">
-                      <p className="text-sm">
+                      <p className="text-xs text-muted-foreground truncate max-w-45">
                         {DOC_TYPE_LABELS[r.docType] ?? r.docType}
                       </p>
                     </td>

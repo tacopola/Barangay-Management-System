@@ -285,10 +285,10 @@ export function BlotterListClient({
                       )}
                     </td>
                     <td className="px-5 py-3.5">
+                      <p className="text-sm text-muted-foreground">{c.complainantName ?? "—"}</p>
                       <p className="text-xs text-muted-foreground">
                         <span className="font-medium text-foreground">vs.</span>
                       </p>
-                      <p className="text-sm">{c.complainantName ?? "—"}</p>
                       <p className="text-sm text-muted-foreground">
                         {c.respondentName}
                       </p>
@@ -378,7 +378,7 @@ export function BlotterListClient({
 
       {/* File / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg p-8">
+        <DialogContent className="w-[40vw] max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl p-12">
           <DialogHeader className="mb-2">
             <DialogTitle className="text-lg">
               {editTarget ? "Edit Case" : "File Blotter Case"}
@@ -389,14 +389,14 @@ export function BlotterListClient({
                 : "Record a new incident or complaint."}
             </DialogDescription>
           </DialogHeader>
-          <BlotterForm
-            blotterCase={editTarget}
-            residents={residents}
-            onSuccess={() => {
-              setDialogOpen(false);
-              router.refresh();
-            }}
-          />
+            <BlotterForm
+              blotterCase={editTarget}
+              residents={residents}
+              onSuccess={() => {
+                setDialogOpen(false);
+                router.refresh();
+              }}
+            />
         </DialogContent>
       </Dialog>
     </>

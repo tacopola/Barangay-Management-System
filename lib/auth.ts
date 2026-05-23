@@ -4,8 +4,9 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { roleEnum } from "@/db/schema/enums";
 
-export type UserRole = "super_admin" | "barangay_admin" | "resident";
+export type UserRole = (typeof roleEnum.enumValues)[number];
 
 export type AuthUser = {
   id: string;
@@ -22,6 +23,7 @@ export const ROLE_HOME: Record<UserRole, string> = {
   super_admin: "/super-admin",
   barangay_admin: "/admin",
   resident: "/resident",
+  department_admin: "/department-admin",
 };
 
 // cache() ensures this runs once per request no matter

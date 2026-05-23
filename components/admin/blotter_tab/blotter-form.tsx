@@ -95,7 +95,7 @@ export function BlotterForm({
           <Select
             name="complainantId"
             value={complainantId}
-            onValueChange={setComplainantId}
+            onValueChange={(v) => setComplainantId(v === "none" ? "" : v)}
           >
             <SelectTrigger className="h-9 text-sm">
               <SelectValue placeholder="Select resident or leave blank..." />

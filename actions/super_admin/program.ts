@@ -7,10 +7,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createAuditLog } from "@/lib/audit/audit-log";
 import { requireSuperAdmin } from "@/lib/auth-helper";
+import { programTypeEnum } from "@/db/schema/enums";
 
 const programSchema = z.object({
   name: z.string().min(2, "Program name is required"),
-  type: z.enum(["4ps", "senior_citizen", "pwd", "solo_parent", "indigent"], {
+  type: z.enum(programTypeEnum.enumValues, {
     message: "Please select a program type",
   }),
   barangayId: z.string().uuid("Please select a barangay"),
@@ -23,7 +24,6 @@ export type ProgramFormState = {
   success?: boolean;
 };
 
-
 export async function createProgramAction(
   _prev: ProgramFormState,
   formData: FormData,
@@ -34,7 +34,7 @@ export async function createProgramAction(
     barangayId: formData.get("barangayId") as string,
     description: (formData.get("description") as string) || undefined,
   };
-const { superadmin } = await requireSuperAdmin();
+  const { superadmin } = await requireSuperAdmin();
   const parsed = programSchema.safeParse(raw);
   if (!parsed.success) {
     return {
@@ -70,8 +70,6 @@ const { superadmin } = await requireSuperAdmin();
     return { error: "Failed to create program. Please try again." };
   }
 }
-
-
 
 export async function updateProgramAction(
   id: string,
@@ -129,7 +127,6 @@ export async function updateProgramAction(
   }
 }
 
-
 export async function toggleProgramStatusAction(
   id: string,
   isActive: boolean,
@@ -167,7 +164,6 @@ export async function toggleProgramStatusAction(
     return { error: "Failed to update status." };
   }
 }
-
 
 export async function deleteProgramAction(
   id: string,
