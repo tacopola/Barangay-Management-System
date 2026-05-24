@@ -18,8 +18,9 @@ export default async function AdminLoginPage() {
       <section className="relative hidden lg:block">
         <Image
           src="/bangui-featured.jpg"
-          alt="Bangui Windmills"
           fill
+          alt="Municipality of Bangui"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
           className="object-cover"
         />
@@ -63,8 +64,6 @@ export default async function AdminLoginPage() {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-8 space-y-4">
-           
-
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tight">
                 Admin Portal
