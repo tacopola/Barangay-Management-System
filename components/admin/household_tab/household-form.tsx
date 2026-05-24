@@ -1,25 +1,21 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+
 import {
   createHouseholdAction,
   updateHouseholdAction,
+  searchResidentsAction,
   type HouseholdFormState,
 } from "@/actions/admin/household";
 
+import { AsyncSearchSelect } from "@/components/async-search-select";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import { Label } from "@/components/ui/label";
-import { Loader2, Home, Crown } from "lucide-react";
+
+import { Crown, Home, Loader2, User } from "lucide-react";
 
 type Household = {
   id: string;
@@ -31,18 +27,28 @@ type Household = {
 type SimpleResident = {
   id: string;
   firstName: string;
+  middleName?: string | null;
   lastName: string;
+  suffix?: string | null;
 };
 
 const initialState: HouseholdFormState = {};
 
+function residentFullName(r: SimpleResident) {
+  return [r.firstName, r.middleName, r.lastName, r.suffix]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function HouseholdForm({
   household,
-  allResidents,
+  defaultHeadResident,
   onSuccess,
 }: {
   household?: Household | null;
-  allResidents: SimpleResident[];
+
+  defaultHeadResident?: SimpleResident | null;
+
   onSuccess?: () => void;
 }) {
   const action = household
@@ -102,41 +108,48 @@ export function HouseholdForm({
         )}
       </div>
 
-      {/* Head of household */}
-      <div className="space-y-2">
-        <Label>Head of Household</Label>
+      {/* Head resident */}
+      <div className="space-y-1.5">
+        <Label>
+          Head of Household{" "}
+          <span className="text-muted-foreground font-normal">(optional)</span>
+        </Label>
 
-        <Select
+        <AsyncSearchSelect<SimpleResident>
           name="headResidentId"
-          defaultValue={household?.headResidentId ?? ""}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select resident" />
-          </SelectTrigger>
+          defaultValue={defaultHeadResident}
+          searchAction={searchResidentsAction}
+          getItemId={(r) => r.id}
+          getItemLabel={(r) => residentFullName(r)}
+          placeholder="Search by name..."
+          emptyMessage="No residents found"
+          fieldError={state.fieldErrors?.headResidentId}
+          helperText="You can assign this later."
+          renderItem={(r) => (
+            <div className="flex items-center gap-2">
+              <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
 
-          <SelectContent>
-            <SelectItem value="none">No head assigned</SelectItem>
+              <span className="text-sm">{residentFullName(r)}</span>
+            </div>
+          )}
+          renderSelected={(r) => (
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                <Crown className="h-4 w-4 text-amber-600" />
+              </div>
 
-            {allResidents.map((resident) => (
-              <SelectItem key={resident.id} value={resident.id}>
-                <div className="flex items-center gap-2">
-                  <Crown className="h-3.5 w-3.5 text-amber-500" />
-                  {resident.firstName} {resident.lastName}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {residentFullName(r)}
+                </p>
 
-        {state.fieldErrors?.headResidentId && (
-          <p className="text-xs text-destructive">
-            {state.fieldErrors.headResidentId}
-          </p>
-        )}
-
-        <p className="text-[11px] text-muted-foreground">
-          Optional. You can assign this later.
-        </p>
+                <p className="text-xs text-muted-foreground">
+                  Head of household
+                </p>
+              </div>
+            </div>
+          )}
+        />
       </div>
 
       {/* Global error */}
@@ -146,7 +159,6 @@ export function HouseholdForm({
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex items-center justify-end gap-2 pt-2">
         <Button type="submit" disabled={pending} className="min-w-28">
           {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

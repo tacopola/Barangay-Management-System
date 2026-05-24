@@ -39,10 +39,6 @@ import {
 } from "lucide-react";
 import { getAuditDiff } from "@/lib/audit/audit-diff";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 type AuditLog = {
   id: string;
   action: string;
@@ -57,9 +53,6 @@ type AuditLog = {
   actorRole: string | null;
 };
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 const PAGE_SIZE = 5;
 
@@ -145,8 +138,6 @@ function DiffView({
       </div>
     );
   }
-
-  // diff.type === "diff"
   return (
     <div className="space-y-1.5">
       {diff.changes.map((c, i) => (
@@ -231,7 +222,7 @@ function LogRow({ log }: { log: AuditLog }) {
         {/* Actor */}
         <TableCell>
           <div className="space-y-0.5">
-            <div className="font-medium text-sm">
+            <div className="font-medium text-xs">
               {log.actorName ?? "System"}
             </div>
             {log.actorRole && (
@@ -249,7 +240,7 @@ function LogRow({ log }: { log: AuditLog }) {
 
         {/* Table */}
         <TableCell>
-          <div className="flex items-center gap-1.5 text-sm">
+          <div className="flex items-center gap-1.5 text-xs">
             <Database className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="capitalize">
               {log.tableName.replace(/_/g, " ")}
@@ -268,7 +259,7 @@ function LogRow({ log }: { log: AuditLog }) {
         </TableCell>
 
         {/* Barangay */}
-        <TableCell className="text-sm">
+        <TableCell className="text-xs text-muted-foreground">
           {log.barangayName ?? (
             <span className="text-muted-foreground">System</span>
           )}
@@ -469,7 +460,7 @@ export function AuditLogsClient({ logs }: { logs: AuditLog[] }) {
               </Select>
 
               {hasFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <Button variant="ghost" size="xs" onClick={clearFilters}>
                   <X className="h-4 w-4 mr-1" />
                   Clear
                 </Button>
@@ -520,14 +511,14 @@ export function AuditLogsClient({ logs }: { logs: AuditLog[] }) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
             Page {page} of {totalPages}
           </span>
           <div className="flex gap-2">
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
@@ -535,7 +526,7 @@ export function AuditLogsClient({ logs }: { logs: AuditLog[] }) {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               disabled={page === totalPages}
               onClick={() => setPage((p) => p + 1)}
             >

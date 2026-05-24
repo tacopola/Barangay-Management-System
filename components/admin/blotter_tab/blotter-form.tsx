@@ -7,19 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import {
   createBlotterAction,
   updateBlotterAction,
+  searchResidentsAction,
 } from "@/actions/admin/blotter";
 import { toast } from "sonner";
+import { AsyncSearchSelect } from "@/components/async-search-select";
 
 type BlotterCase = {
   id: string;
@@ -53,9 +48,11 @@ export function BlotterForm({
     : createBlotterAction;
 
   const [state, formAction, isPending] = useActionState(action, {});
+
   const [complainantId, setComplainantId] = useState(
     blotterCase?.complainantId ?? "",
   );
+
   const [respondentId, setRespondentId] = useState(
     blotterCase?.respondentId ?? "",
   );
@@ -65,15 +62,22 @@ export function BlotterForm({
       toast.success(blotterCase ? "Case updated." : "Blotter case filed.");
       onSuccess?.();
     }
-  }, [state.success]);
+  }, [state.success, blotterCase, onSuccess]);
 
-  const residentOptions = residents.map((r) => ({
-    value: r.id,
-    label: `${r.lastName}, ${r.firstName}${r.middleName ? " " + r.middleName[0] + "." : ""}`,
-  }));
+  const complainantResident =
+    residents.find((r) => r.id === complainantId) ?? null;
+
+  const respondentResident =
+    residents.find((r) => r.id === respondentId) ?? null;
+
+  function residentLabel(r: SimpleResident) {
+    return `${r.lastName}, ${r.firstName}${
+      r.middleName ? ` ${r.middleName[0]}.` : ""
+    }`;
+  }
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="max-h-[70vh] p-2">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -81,42 +85,47 @@ export function BlotterForm({
       )}
 
       {/* Complainant */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Complainant
           </p>
+
           <Separator className="mt-1.5" />
         </div>
-        <div className="space-y-1.5">
+
+        <div className="space-y-2">
           <Label className="text-xs font-medium">
             Registered Resident (optional)
           </Label>
-          <Select
+
+          <AsyncSearchSelect<SimpleResident>
             name="complainantId"
-            value={complainantId}
-            onValueChange={(v) => setComplainantId(v === "none" ? "" : v)}
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Select resident or leave blank..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none" className="text-sm">
-                Not a registered resident
-              </SelectItem>
-              {residentOptions.map((r) => (
-                <SelectItem key={r.value} value={r.value} className="text-sm">
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            defaultValue={complainantResident}
+            searchAction={searchResidentsAction}
+            getItemId={(r) => r.id}
+            getItemLabel={residentLabel}
+            placeholder="Search complainant..."
+            emptyMessage="No resident found"
+            helperText="You may leave this blank for non-residents."
+            onSelect={(resident) => {
+              setComplainantId(resident?.id ?? "");
+            }}
+            renderItem={(r) => (
+              <div className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span>{residentLabel(r)}</span>
+              </div>
+            )}
+          />
         </div>
-        {(!complainantId || complainantId === "none") && (
-          <div className="space-y-1.5">
+
+        {!complainantId && (
+          <div className="space-y-2">
             <Label htmlFor="complainantName" className="text-xs font-medium">
               Complainant Name
             </Label>
+
             <Input
               id="complainantName"
               name="complainantName"
@@ -129,69 +138,79 @@ export function BlotterForm({
       </div>
 
       {/* Respondent */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs mt-2 font-bold uppercase tracking-widest text-muted-foreground">
             Respondent
           </p>
+
           <Separator className="mt-1.5" />
         </div>
-        <div className="space-y-1.5">
+
+        <div className="space-y-2">
           <Label className="text-xs font-medium">
             Registered Resident (optional)
           </Label>
-          <Select
+
+          <AsyncSearchSelect<SimpleResident>
             name="respondentId"
-            value={respondentId}
-            onValueChange={setRespondentId}
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Select resident or leave blank..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none" className="text-sm">
-                Not a registered resident
-              </SelectItem>
-              {residentOptions.map((r) => (
-                <SelectItem key={r.value} value={r.value} className="text-sm">
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="respondentName" className="text-xs font-medium">
-            Respondent Name <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="respondentName"
-            name="respondentName"
-            placeholder="Full name of respondent"
-            defaultValue={blotterCase?.respondentName ?? ""}
-            className="h-9 text-sm"
+            defaultValue={respondentResident}
+            searchAction={searchResidentsAction}
+            getItemId={(r) => r.id}
+            getItemLabel={residentLabel}
+            placeholder="Search respondent..."
+            emptyMessage="No resident found"
+            onSelect={(resident) => {
+              setRespondentId(resident?.id ?? "");
+            }}
+            renderItem={(r) => (
+              <div className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span>{residentLabel(r)}</span>
+              </div>
+            )}
           />
-          {state.fieldErrors?.respondentName && (
-            <p className="text-xs text-destructive">
-              {state.fieldErrors.respondentName}
-            </p>
-          )}
         </div>
+
+        {!respondentId && (
+          <div className="space-y-2">
+            <Label htmlFor="respondentName" className="text-xs font-medium">
+              Respondent Name <span className="text-destructive">*</span>
+            </Label>
+
+            <Input
+              id="respondentName"
+              name="respondentName"
+              placeholder="Full name of respondent"
+              defaultValue={blotterCase?.respondentName ?? ""}
+              className="h-9 text-sm"
+            />
+
+            {state.fieldErrors?.respondentName && (
+              <p className="text-xs text-destructive">
+                {state.fieldErrors.respondentName}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Incident details */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs mt-2 font-bold uppercase tracking-widest text-muted-foreground">
             Incident Details
           </p>
+
           <Separator className="mt-1.5" />
         </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="incidentDate" className="text-xs font-medium">
               Incident Date <span className="text-destructive">*</span>
             </Label>
+
             <Input
               id="incidentDate"
               name="incidentDate"
@@ -199,16 +218,19 @@ export function BlotterForm({
               defaultValue={blotterCase?.incidentDate ?? ""}
               className="h-9 text-sm"
             />
+
             {state.fieldErrors?.incidentDate && (
               <p className="text-xs text-destructive">
                 {state.fieldErrors.incidentDate}
               </p>
             )}
           </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="incidentLocation" className="text-xs font-medium">
               Location <span className="text-destructive">*</span>
             </Label>
+
             <Input
               id="incidentLocation"
               name="incidentLocation"
@@ -216,6 +238,7 @@ export function BlotterForm({
               defaultValue={blotterCase?.incidentLocation ?? ""}
               className="h-9 text-sm"
             />
+
             {state.fieldErrors?.incidentLocation && (
               <p className="text-xs text-destructive">
                 {state.fieldErrors.incidentLocation}
@@ -223,10 +246,12 @@ export function BlotterForm({
             )}
           </div>
         </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="narrative" className="text-xs font-medium">
             Narrative <span className="text-destructive">*</span>
           </Label>
+
           <Textarea
             id="narrative"
             name="narrative"
@@ -235,6 +260,7 @@ export function BlotterForm({
             rows={5}
             className="text-sm resize-none"
           />
+
           {state.fieldErrors?.narrative && (
             <p className="text-xs text-destructive">
               {state.fieldErrors.narrative}
@@ -243,10 +269,11 @@ export function BlotterForm({
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
+      <Button type="submit" className="w-full my-4" disabled={isPending}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saving...
           </>
         ) : blotterCase ? (
           "Save Changes"

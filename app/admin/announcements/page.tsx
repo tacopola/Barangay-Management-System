@@ -1,10 +1,11 @@
-export default function ProgramsPage() {
+export default function AnnouncementsPage() {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold">Programs</h1>
+      <h1 className="text-2xl font-semibold">Announcements</h1>
       <p className="text-muted-foreground text-sm mt-1">
-        Beneficiary programs.
+        Important announcements for the barangay.
       </p>
     </div>
   );
 }
+

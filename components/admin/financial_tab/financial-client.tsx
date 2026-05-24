@@ -105,9 +105,6 @@ type CustomTooltipProps = {
   label?: string;
 };
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 const INCOME_CATEGORIES = [
   "IRA (Internal Revenue Allotment)",
@@ -147,9 +144,6 @@ const QUARTER_LABELS = [
   "Q4 (Oct-Dec)",
 ];
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -173,9 +167,6 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
 
 export function FinancialsClient({
   records,

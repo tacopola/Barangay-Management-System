@@ -72,7 +72,7 @@ export function FinancialForm({
   const categories = type === "income" ? incomeCategories : expenseCategories;
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="overflow-y-auto max-h-[70vh]">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -80,7 +80,7 @@ export function FinancialForm({
       )}
 
       {/* Type */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label className="text-xs font-medium">
           Type <span className="text-destructive">*</span>
         </Label>
@@ -115,8 +115,8 @@ export function FinancialForm({
       </div>
 
       {/* Category */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium mt-2">
           Category <span className="text-destructive">*</span>
         </Label>
         <Select
@@ -146,7 +146,7 @@ export function FinancialForm({
       </div>
 
       {/* Amount */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label htmlFor="amount" className="text-xs font-medium">
           Amount (₱) <span className="text-destructive">*</span>
         </Label>
@@ -172,7 +172,7 @@ export function FinancialForm({
 
       {/* Date + Quarter */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="transactionDate" className="text-xs font-medium">
             Transaction Date <span className="text-destructive">*</span>
           </Label>
@@ -189,8 +189,8 @@ export function FinancialForm({
             </p>
           )}
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium">Quarter</Label>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium mt-2">Quarter</Label>
           <Select name="quarter" value={quarter} onValueChange={setQuarter}>
             <SelectTrigger className="h-9 text-sm">
               <SelectValue placeholder="Select..." />
@@ -200,16 +200,16 @@ export function FinancialForm({
                 None
               </SelectItem>
               <SelectItem value="1" className="text-sm">
-                Q1 (Jan–Mar)
+                Q1 (Jan-Mar)
               </SelectItem>
               <SelectItem value="2" className="text-sm">
-                Q2 (Apr–Jun)
+                Q2 (Apr-Jun)
               </SelectItem>
               <SelectItem value="3" className="text-sm">
-                Q3 (Jul–Sep)
+                Q3 (Jul-Sep)
               </SelectItem>
               <SelectItem value="4" className="text-sm">
-                Q4 (Oct–Dec)
+                Q4 (Oct-Dec)
               </SelectItem>
             </SelectContent>
           </Select>
@@ -217,8 +217,8 @@ export function FinancialForm({
       </div>
 
       {/* Fiscal year */}
-      <div className="space-y-1.5">
-        <Label htmlFor="fiscalYear" className="text-xs font-medium">
+      <div className="space-y-2">
+        <Label htmlFor="fiscalYear" className="text-xs mt-2 font-medium">
           Fiscal Year <span className="text-destructive">*</span>
         </Label>
         <Input
@@ -236,14 +236,14 @@ export function FinancialForm({
       </div>
 
       <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs mt-2 font-bold uppercase tracking-widest text-muted-foreground">
           Additional Info
         </p>
         <Separator className="mt-1.5 mb-3" />
       </div>
 
       {/* Reference number */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label htmlFor="referenceNumber" className="text-xs font-medium">
           Reference / OR Number
           <span className="text-muted-foreground ml-1">(optional)</span>
@@ -258,8 +258,8 @@ export function FinancialForm({
       </div>
 
       {/* Description */}
-      <div className="space-y-1.5">
-        <Label htmlFor="description" className="text-xs font-medium">
+      <div className="space-y-2">
+        <Label htmlFor="description" className="text-xs mt-2 font-medium">
           Description
           <span className="text-muted-foreground ml-1">(optional)</span>
         </Label>
@@ -275,7 +275,7 @@ export function FinancialForm({
 
       <Button
         type="submit"
-        className="w-full"
+        className="w-full my-4"
         disabled={isPending || !type || !category}
       >
         {isPending ? (

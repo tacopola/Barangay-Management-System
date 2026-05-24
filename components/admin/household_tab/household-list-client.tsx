@@ -46,6 +46,7 @@ import { deleteHouseholdAction } from "@/actions/admin/household";
 import { HouseholdForm } from "./household-form";
 import { toast } from "sonner";
 
+
 type Member = {
   id: string;
   firstName: string;
@@ -66,18 +67,52 @@ type Household = {
   createdAt: Date;
 };
 
-type SimpleResident = {
-  id: string;
-  firstName: string;
-  lastName: string;
-};
+
+function householdLabel(h: Household) {
+  if (h.headName) {
+    const lastName = h.headName.split(" ").pop();
+    return `${lastName} Household`;
+  }
+  return `${h.houseNumber ? "#" + h.houseNumber + " " : ""}${h.streetPurok ?? "Household"}`;
+}
+
+function householdAddress(h: Household) {
+  return [h.houseNumber ? "#" + h.houseNumber : null, h.streetPurok]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function getAge(birthDate: string) {
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+// Derive a SimpleResident for the current head from the household's member list
+// so we can pre-populate the search input when editing
+function getHeadResident(h: Household) {
+  if (!h.headResidentId || !h.headName) return null;
+  const member = h.members.find((m) => m.id === h.headResidentId);
+  if (!member) return null;
+  return {
+    id: member.id,
+    firstName: member.firstName,
+    lastName: member.lastName,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function HouseholdListClient({
   households,
-  allResidents,
 }: {
   households: Household[];
-  allResidents: SimpleResident[];
+  // allResidents no longer needed — head search is now a live server action
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -95,29 +130,6 @@ export function HouseholdListClient({
       h.headName?.toLowerCase().includes(search.toLowerCase())
     );
   });
-
-  function householdLabel(h: Household) {
-    if (h.headName) {
-      const lastName = h.headName.split(" ").pop();
-      return `${lastName} Household`;
-    }
-    return `${h.houseNumber ? "#" + h.houseNumber + " " : ""}${h.streetPurok ?? "Household"}`;
-  }
-
-  function householdAddress(h: Household) {
-    return [h.houseNumber ? "#" + h.houseNumber : null, h.streetPurok]
-      .filter(Boolean)
-      .join(" · ");
-  }
-
-  function getAge(birthDate: string) {
-    const birth = new Date(birthDate);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-    return age;
-  }
 
   function openCreate() {
     setEditTarget(null);
@@ -205,7 +217,7 @@ export function HouseholdListClient({
           </div>
         </div>
 
-        {/* Household cards */}
+        {/* Household list */}
         <div className="divide-y">
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-sm text-muted-foreground">
@@ -217,9 +229,7 @@ export function HouseholdListClient({
               const isExpanded = expandedId === h.id;
               return (
                 <div key={h.id}>
-                  {/* Household row */}
                   <div className="flex items-center gap-3 px-5 py-4 hover:bg-muted/20 transition-colors">
-                    {/* Expand toggle */}
                     <button
                       onClick={() => toggleExpand(h.id)}
                       className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
@@ -231,12 +241,10 @@ export function HouseholdListClient({
                       )}
                     </button>
 
-                    {/* Icon */}
                     <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Home className="h-4 w-4 text-primary" />
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold">
@@ -254,7 +262,6 @@ export function HouseholdListClient({
                       </p>
                     </div>
 
-                    {/* Member count badge */}
                     <Badge
                       variant="secondary"
                       className="text-xs shrink-0 hidden sm:flex"
@@ -263,7 +270,6 @@ export function HouseholdListClient({
                       {h.memberCount === 1 ? "member" : "members"}
                     </Badge>
 
-                    {/* Actions */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -289,7 +295,6 @@ export function HouseholdListClient({
                     </DropdownMenu>
                   </div>
 
-                  {/* Expanded members list */}
                   {isExpanded && (
                     <div className="bg-muted/20 border-t px-5 py-3 space-y-2">
                       {h.members.length === 0 ? (
@@ -352,7 +357,7 @@ export function HouseholdListClient({
         </div>
       </div>
 
-      {/* Create / Edit Dialog */}
+      {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md p-8">
           <DialogHeader className="mb-2">
@@ -367,7 +372,9 @@ export function HouseholdListClient({
           </DialogHeader>
           <HouseholdForm
             household={editTarget}
-            allResidents={allResidents}
+            defaultHeadResident={
+              editTarget ? getHeadResident(editTarget) : null
+            }
             onSuccess={() => {
               setDialogOpen(false);
               router.refresh();

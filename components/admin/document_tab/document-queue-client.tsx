@@ -1,5 +1,6 @@
 "use client";
-
+import { AsyncSearchSelect } from "@/components/async-search-select";
+import { User } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ import {
   rejectDocumentAction,
   releaseDocumentAction,
   adminRequestDocumentAction,
+  searchResidentsAction,
 } from "@/actions/admin/document";
 import { toast } from "sonner";
 
@@ -88,7 +90,6 @@ type StatusFilter = "all" | "pending" | "approved" | "rejected" | "released";
 
 export function DocumentQueueClient({
   requests,
-  residents,
 }: {
   requests: DocRequest[];
   residents: SimpleResident[];
@@ -452,7 +453,6 @@ export function DocumentQueueClient({
             </DialogDescription>
           </DialogHeader>
           <WalkInRequestForm
-            residents={residents}
             onSuccess={() => {
               setCreateOpen(false);
               router.refresh();
@@ -551,64 +551,92 @@ export function DocumentQueueClient({
   );
 }
 
-function WalkInRequestForm({
-  residents,
-  onSuccess,
-}: {
-  residents: SimpleResident[];
-  onSuccess: () => void;
-}) {
+function WalkInRequestForm({ onSuccess }: { onSuccess: () => void }) {
   const [state, formAction, isPending] = useActionState(
     adminRequestDocumentAction,
     {},
   );
-  const [residentId, setResidentId] = useState("");
+
   const [docType, setDocType] = useState("");
+
   const router = useRouter();
 
   useEffect(() => {
     if (state.success) {
       toast.success("Request created.");
+
       onSuccess();
+
       router.refresh();
     }
-  }, [state.success]);
+  }, [state.success, onSuccess, router]);
+
+  function residentFullName(r: SimpleResident) {
+    return [
+      r.lastName + ",",
+      r.firstName,
+      r.middleName ? r.middleName[0] + "." : null,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
 
   return (
     <form action={formAction} className="space-y-4">
       {state.error && <p className="text-xs text-destructive">{state.error}</p>}
 
+      {/* Resident */}
       <div className="space-y-1.5">
         <Label className="text-xs font-medium">
           Resident <span className="text-destructive">*</span>
         </Label>
-        <Select
+
+        <AsyncSearchSelect<SimpleResident>
           name="residentId"
-          value={residentId}
-          onValueChange={setResidentId}
-        >
-          <SelectTrigger className="h-9 text-sm">
-            <SelectValue placeholder="Select resident..." />
-          </SelectTrigger>
-          <SelectContent>
-            {residents.map((r) => (
-              <SelectItem key={r.id} value={r.id} className="text-sm">
-                {r.lastName}, {r.firstName}{" "}
-                {r.middleName ? r.middleName[0] + "." : ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          searchAction={searchResidentsAction}
+          getItemId={(r) => r.id}
+          getItemLabel={(r) => residentFullName(r)}
+          placeholder="Search resident..."
+          emptyMessage="No residents found"
+          fieldError={state.fieldErrors?.residentId}
+          renderItem={(r) => (
+            <div className="flex items-center gap-2">
+              <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+
+              <span className="text-sm">{residentFullName(r)}</span>
+            </div>
+          )}
+          renderSelected={(r) => (
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-4 w-4 text-primary" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {residentFullName(r)}
+                </p>
+
+                <p className="text-xs text-muted-foreground">
+                  Selected resident
+                </p>
+              </div>
+            </div>
+          )}
+        />
       </div>
 
+      {/* Document type */}
       <div className="space-y-1.5">
         <Label className="text-xs font-medium">
           Document Type <span className="text-destructive">*</span>
         </Label>
+
         <Select name="docType" value={docType} onValueChange={setDocType}>
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder="Select document..." />
           </SelectTrigger>
+
           <SelectContent>
             {DOC_TYPES.map((t) => (
               <SelectItem key={t.value} value={t.value} className="text-sm">
@@ -617,18 +645,27 @@ function WalkInRequestForm({
             ))}
           </SelectContent>
         </Select>
+
+        {state.fieldErrors?.docType && (
+          <p className="text-xs text-destructive">
+            {state.fieldErrors.docType}
+          </p>
+        )}
       </div>
 
+      {/* Purpose */}
       <div className="space-y-1.5">
         <Label className="text-xs font-medium">
           Purpose <span className="text-destructive">*</span>
         </Label>
+
         <Textarea
           name="purpose"
           placeholder="e.g. Employment requirement, scholarship application..."
           className="text-sm resize-none"
           rows={2}
         />
+
         {state.fieldErrors?.purpose && (
           <p className="text-xs text-destructive">
             {state.fieldErrors.purpose}

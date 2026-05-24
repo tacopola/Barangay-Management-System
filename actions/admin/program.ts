@@ -7,15 +7,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { createAuditLog } from "@/lib/audit/audit-log";
-import { programTypeEnum } from "@/db/schema/enums";
-
-const programSchema = z.object({
-  name: z.string().min(1, "Program name is required").max(150),
-  type: z.enum(programTypeEnum.enumValues, {
-    message: "Program type is required",
-  }),
-  description: z.string().optional(),
-});
 
 const enrollSchema = z.object({
   residentId: z.string().uuid("Invalid resident"),
@@ -27,157 +18,19 @@ const removeSchema = z.object({
   removalReason: z.string().min(1, "Reason is required"),
 });
 
-export type ProgramFormState = {
-  error?: string;
-  fieldErrors?: Record<string, string>;
-  success?: boolean;
-};
-
 export type EnrollFormState = {
   error?: string;
   fieldErrors?: Record<string, string>;
   success?: boolean;
 };
 
-export async function createProgramAction(
-  _prev: ProgramFormState,
-  formData: FormData,
-): Promise<ProgramFormState> {
-  const { admin, barangayId } = await requireBarangayAdmin();
-
-  const raw = {
-    name: formData.get("name") as string,
-    type: formData.get("type") as string,
-    description: (formData.get("description") as string) || undefined,
-  };
-
-  const parsed = programSchema.safeParse(raw);
-  if (!parsed.success) {
-    return {
-      fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    };
-  }
-
-  try {
-    const [program] = await db
-      .insert(programs)
-      .values({
-        barangayId,
-        name: parsed.data.name,
-        type: parsed.data.type,
-        description: parsed.data.description,
-        isActive: true,
-      })
-      .returning();
-
-    await createAuditLog({
-      actorId: admin.id,
-      barangayId,
-      action: "create",
-      tableName: "programs",
-      recordId: program.id,
-      newValue: program,
-    });
-
-    revalidatePath("/admin/programs");
-    return { success: true };
-  } catch (e) {
-    console.error("Error creating program:", e);
-    return { error: "Failed to create program. Please try again." };
-  }
-}
-
-export async function updateProgramAction(
-  id: string,
-  _prev: ProgramFormState,
-  formData: FormData,
-): Promise<ProgramFormState> {
-  const { admin, barangayId } = await requireBarangayAdmin();
-
-  const raw = {
-    name: formData.get("name") as string,
-    type: formData.get("type") as string,
-    description: (formData.get("description") as string) || undefined,
-  };
-
-  const parsed = programSchema.safeParse(raw);
-  if (!parsed.success) {
-    return {
-      fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string>,
-    };
-  }
-
-  try {
-    const existing = await db.query.programs.findFirst({
-      where: and(eq(programs.id, id), eq(programs.barangayId, barangayId)),
-    });
-
-    if (!existing) return { error: "Program not found." };
-
-    await db
-      .update(programs)
-      .set({
-        name: parsed.data.name,
-        type: parsed.data.type,
-        description: parsed.data.description,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(programs.id, id), eq(programs.barangayId, barangayId)));
-
-    await createAuditLog({
-      actorId: admin.id,
-      barangayId,
-      action: "update",
-      tableName: "programs",
-      recordId: id,
-      previousValue: existing,
-      newValue: { ...existing, ...parsed.data },
-    });
-
-    revalidatePath("/admin/programs");
-    revalidatePath(`/admin/programs/${id}`);
-    return { success: true };
-  } catch (e) {
-    console.error("Error updating program:", e);
-    return { error: "Failed to update program. Please try again." };
-  }
-}
-
-export async function toggleProgramStatusAction(
-  id: string,
-): Promise<{ error?: string }> {
-  const { admin, barangayId } = await requireBarangayAdmin();
-
-  try {
-    const existing = await db.query.programs.findFirst({
-      where: and(eq(programs.id, id), eq(programs.barangayId, barangayId)),
-    });
-
-    if (!existing) return { error: "Program not found." };
-
-    const [updated] = await db
-      .update(programs)
-      .set({ isActive: !existing.isActive, updatedAt: new Date() })
-      .where(and(eq(programs.id, id), eq(programs.barangayId, barangayId)))
-      .returning();
-
-    await createAuditLog({
-      actorId: admin.id,
-      barangayId,
-      action: "update",
-      tableName: "programs",
-      recordId: id,
-      previousValue: { isActive: existing.isActive },
-      newValue: { isActive: updated.isActive },
-    });
-
-    revalidatePath("/admin/programs");
-    revalidatePath(`/admin/programs/${id}`);
-    return {};
-  } catch (e) {
-    console.error("Error toggling program status:", e);
-    return { error: "Failed to update program status." };
-  }
+export async function searchEligibleResidentsAction(
+  programId: string,
+  search: string,
+) {
+  const { barangayId } = await requireBarangayAdmin();
+  const { getEligibleResidents } = await import("@/db/queries/admin/program");
+  return getEligibleResidents(barangayId, programId, search);
 }
 
 export async function enrollBeneficiaryAction(
@@ -201,7 +54,7 @@ export async function enrollBeneficiaryAction(
   }
 
   try {
-    // Check program belongs to barangay
+    // Verify program belongs to this barangay
     const program = await db.query.programs.findFirst({
       where: and(
         eq(programs.id, programId),

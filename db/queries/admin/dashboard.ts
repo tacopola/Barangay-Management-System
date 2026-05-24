@@ -6,9 +6,8 @@ import {
   households,
   barangays,
 } from "@/db/schema";
-import { eq, count, and } from "drizzle-orm";
+import { eq, count, and, desc } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
-
 
 export const getAdminStats = (barangayId: string) =>
   unstable_cache(
@@ -19,8 +18,8 @@ export const getAdminStats = (barangayId: string) =>
         .where(
           and(
             eq(residents.barangayId, barangayId),
-            eq(residents.isArchived, false)
-          )
+            eq(residents.isArchived, false),
+          ),
         );
 
       const [totalHouseholds] = await db
@@ -34,8 +33,8 @@ export const getAdminStats = (barangayId: string) =>
         .where(
           and(
             eq(documentRequests.barangayId, barangayId),
-            eq(documentRequests.status, "pending")
-          )
+            eq(documentRequests.status, "pending"),
+          ),
         );
 
       const [activeBlotters] = await db
@@ -44,8 +43,8 @@ export const getAdminStats = (barangayId: string) =>
         .where(
           and(
             eq(blotterCases.barangayId, barangayId),
-            eq(blotterCases.status, "filed")
-          )
+            eq(blotterCases.status, "filed"),
+          ),
         );
 
       return {
@@ -56,9 +55,8 @@ export const getAdminStats = (barangayId: string) =>
       };
     },
     [`admin-stats-${barangayId}`],
-    { revalidate: 60 }
+    { revalidate: 60 },
   )();
-
 
 export const getRecentDocRequests = (barangayId: string) =>
   unstable_cache(
@@ -67,13 +65,12 @@ export const getRecentDocRequests = (barangayId: string) =>
         .select()
         .from(documentRequests)
         .where(eq(documentRequests.barangayId, barangayId))
-        .orderBy(documentRequests.createdAt)
-        .limit(6);
+        .orderBy(desc(documentRequests.createdAt))
+        .limit(5);
     },
     [`recent-docs-${barangayId}`],
-    { revalidate: 30 }
+    { revalidate: 30 },
   )();
-
 
 export const getRecentBlotter = (barangayId: string) =>
   unstable_cache(
@@ -82,13 +79,12 @@ export const getRecentBlotter = (barangayId: string) =>
         .select()
         .from(blotterCases)
         .where(eq(blotterCases.barangayId, barangayId))
-        .orderBy(blotterCases.createdAt)
-        .limit(6);
+        .orderBy(desc(blotterCases.createdAt))
+        .limit(5);
     },
     [`recent-blotter-${barangayId}`],
-    { revalidate: 30 }
+    { revalidate: 30 },
   )();
-
 
 export const getBarangayName = (barangayId: string) =>
   unstable_cache(
@@ -102,5 +98,5 @@ export const getBarangayName = (barangayId: string) =>
       return brgy?.name ?? "Barangay";
     },
     [`barangay-name-${barangayId}`],
-    { revalidate: 300 }
+    { revalidate: 300 },
   )();

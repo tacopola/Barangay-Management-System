@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { blotterCases, blotterProceedings, residents } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, ilike } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireBarangayAdmin, requireResident } from "@/lib/auth-helper";
@@ -402,4 +402,32 @@ export async function residentFileBlotterAction(
     console.error("Error filing blotter:", e);
     return { error: "Failed to file complaint. Please try again." };
   }
+}
+
+export async function searchResidentsAction(query: string) {
+  const { barangayId } = await requireBarangayAdmin();
+
+  if (!query.trim()) return [];
+
+  return db
+    .select({
+      id: residents.id,
+      firstName: residents.firstName,
+      middleName: residents.middleName,
+      lastName: residents.lastName,
+      suffix: residents.suffix,
+    })
+    .from(residents)
+    .where(
+      and(
+        eq(residents.barangayId, barangayId),
+        eq(residents.isArchived, false),
+        or(
+          ilike(residents.firstName, `%${query}%`),
+          ilike(residents.lastName, `%${query}%`),
+        ),
+      ),
+    )
+    .orderBy(residents.lastName, residents.firstName)
+    .limit(10);
 }

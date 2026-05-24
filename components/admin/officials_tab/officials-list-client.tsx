@@ -636,7 +636,6 @@ export function OfficialListClient({
           </DialogHeader>
           <OfficialForm
             official={editTarget}
-            allResidents={allResidents}
             onSuccess={() => {
               setDialogOpen(false);
               router.refresh();

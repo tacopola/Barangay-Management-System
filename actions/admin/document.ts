@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { documentRequests, residents } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ilike, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { docTypeEnum } from "@/db/schema/enums";
@@ -228,4 +228,32 @@ export async function releaseDocumentAction(
     console.error("Error releasing document:", e);
     return { error: "Failed to release document." };
   }
+}
+
+export async function searchResidentsAction(query: string) {
+  const { barangayId } = await requireBarangayAdmin();
+
+  if (!query.trim()) return [];
+
+  return db
+    .select({
+      id: residents.id,
+      firstName: residents.firstName,
+      middleName: residents.middleName,
+      lastName: residents.lastName,
+      suffix: residents.suffix,
+    })
+    .from(residents)
+    .where(
+      and(
+        eq(residents.barangayId, barangayId),
+        eq(residents.isArchived, false),
+        or(
+          ilike(residents.firstName, `%${query}%`),
+          ilike(residents.lastName, `%${query}%`),
+        ),
+      ),
+    )
+    .orderBy(residents.lastName, residents.firstName)
+    .limit(10);
 }

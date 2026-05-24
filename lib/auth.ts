@@ -71,7 +71,7 @@ export const getAuthUser = cache(async (): Promise<AuthUser | null> => {
 
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getAuthUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/auth/resident-login");
   return user;
 }
 

@@ -35,6 +35,6 @@ export const getAuditLogs = unstable_cache(
   },
   ["audit-logs"],
   {
-    revalidate: 15, 
-  }
+    revalidate: 30,
+  },
 );
