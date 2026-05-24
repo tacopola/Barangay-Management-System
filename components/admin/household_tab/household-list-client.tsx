@@ -104,15 +104,10 @@ function getHeadResident(h: Household) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export function HouseholdListClient({
   households,
 }: {
   households: Household[];
-  // allResidents no longer needed — head search is now a live server action
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
