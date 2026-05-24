@@ -14,7 +14,7 @@ import {
   searchResidentsAction,
 } from "@/actions/admin/blotter";
 import { toast } from "sonner";
-import { AsyncSearchSelect } from "@/components/shared/async-search-select";
+import { AsyncSearchSelect } from "@/components/async-search-select";
 
 type BlotterCase = {
   id: string;

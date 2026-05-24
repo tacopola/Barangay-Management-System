@@ -1,5 +1,5 @@
 "use client";
-import { AsyncSearchSelect } from "@/components/shared/async-search-select";
+import { AsyncSearchSelect } from "@/components/async-search-select";
 import { User } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
