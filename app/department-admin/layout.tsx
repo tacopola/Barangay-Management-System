@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { requireDepartmentAdmin } from "@/lib/auth-helper";
-import { redirect } from "next/navigation";
 
 export default async function DepartmentAdminLayout({
   children,

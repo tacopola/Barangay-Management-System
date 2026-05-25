@@ -9,7 +9,6 @@ export default async function TreasuryLayout({
 }) {
   try {
     await requireDepartmentAdminOf("treasury");
-
     return children;
   } catch {
     redirect("/department-admin");

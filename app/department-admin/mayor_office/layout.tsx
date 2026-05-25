@@ -9,7 +9,6 @@ export default async function MayorOfficeLayout({
 }) {
   try {
     await requireDepartmentAdminOf("mayor_office");
-
     return children;
   } catch {
     redirect("/department-admin");
