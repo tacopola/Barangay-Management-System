@@ -9,7 +9,7 @@ import {
   type OfficialFormState,
 } from "@/actions/admin/official";
 
-import { AsyncSearchSelect } from "@/components/async-search-select";
+import { AsyncSearchSelect } from "@/components/shared/async-search-select";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
