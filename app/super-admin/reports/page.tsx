@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth";
 import { getReportsData } from "@/db/queries/super-admin/report";
-import { ReportsClient } from "@/components/super-admin/report_tab/reports-client";
+import { ReportsClient } from "@/components/super-admin/reports/reports-client";
 
 export default async function ReportsPage() {
   await requireRole("super_admin");

@@ -21,7 +21,7 @@ import {
   Send,
   Loader2,
 } from "lucide-react";
-import { requestDocumentAction } from "@/actions/admin/document";
+import { requestDocumentAction } from "@/actions/barangay-admin/document";
 import { toast } from "sonner";
 
 const DOC_TYPE_LABELS: Record<string, string> = {
@@ -87,7 +87,6 @@ export function ResidentDocumentsClient({
 }) {
   const [requestOpen, setRequestOpen] = useState(false);
 
-
   return (
     <div className="space-y-5">
       {/* Request button */}
@@ -126,7 +125,6 @@ export function ResidentDocumentsClient({
           </p>
           {requests.map((r) => {
             const status = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending;
-        
 
             return (
               <div

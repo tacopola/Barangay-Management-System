@@ -3,7 +3,7 @@ import {
   getAllBarangays,
 } from "@/db/queries/super-admin/program";
 
-import { ProgramListClient } from "@/components/super-admin/program_tab/program-list-client";
+import { ProgramListClient } from "@/components/super-admin/programs/program-list-client";
 
 export default async function ProgramsPage() {
   const [data, allBarangays] = await Promise.all([

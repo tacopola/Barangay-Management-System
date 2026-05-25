@@ -1,5 +1,5 @@
 import { getAuditLogs } from "@/db/queries/super-admin/audit-log";
-import { AuditLogsClient } from "@/components/super-admin/audit-log_tab/audit-logs-client";
+import { AuditLogsClient } from "@/components/super-admin/audit-logs/audit-logs-client";
 
 export default async function AuditLogsPage() {
   const logs = await getAuditLogs();

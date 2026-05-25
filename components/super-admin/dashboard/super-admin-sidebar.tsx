@@ -13,6 +13,7 @@ import {
   BarChart3,
   ScrollText,
   Boxes,
+  BriefcaseBusiness,
 } from "lucide-react";
 
 type NavItem = {
@@ -40,6 +41,11 @@ const navItems: NavSection[] = [
         exact: true,
       },
       { href: "/super-admin/barangays", label: "Barangays", icon: Building2 },
+      {
+        href: "/super-admin/departments",
+        label: "Departments",
+        icon: BriefcaseBusiness,
+      },
     ],
   },
   {

@@ -1,5 +1,5 @@
 import { getBarangaysWithStats } from "@/db/queries/super-admin/barangay";
-import { BarangayListClient } from "@/components/super-admin/barangay_tab/barangay-list-client";
+import { BarangayListClient } from "@/components/super-admin/barangays/barangay-list-client";
 
 export default async function BarangaysPage() {
   const data = await getBarangaysWithStats();

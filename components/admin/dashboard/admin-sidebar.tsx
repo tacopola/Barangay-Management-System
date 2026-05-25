@@ -35,7 +35,7 @@ const navItems: NavSection[] = [
     label: "Overview",
     items: [
       {
-        href: "/admin",
+        href: "/barangay-admin",
         label: "Dashboard",
         icon: LayoutDashboard,
         exact: true,
@@ -45,25 +45,33 @@ const navItems: NavSection[] = [
   {
     label: "People",
     items: [
-      { href: "/admin/residents", label: "Residents", icon: Users },
-      { href: "/admin/households", label: "Households", icon: Home },
-      { href: "/admin/officials", label: "Officials", icon: UserCheck },
+      { href: "/barangay-admin/residents", label: "Residents", icon: Users },
+      { href: "/barangay-admin/households", label: "Households", icon: Home },
+      {
+        href: "/barangay-admin/officials",
+        label: "Officials",
+        icon: UserCheck,
+      },
     ],
   },
   {
     label: "Services",
     items: [
-      { href: "/admin/documents", label: "Documents", icon: FileText },
-      { href: "/admin/blotter", label: "Blotter", icon: Shield },
+      { href: "/barangay-admin/documents", label: "Documents", icon: FileText },
+      { href: "/barangay-admin/blotter", label: "Blotter", icon: Shield },
     ],
   },
   {
     label: "Barangay",
     items: [
-      { href: "/admin/financials", label: "Financials", icon: Wallet },
-      { href: "/admin/programs", label: "Programs", icon: Boxes },
-      { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
-      { href: "/admin/import", label: "Import Data", icon: Upload },
+      { href: "/barangay-admin/financials", label: "Financials", icon: Wallet },
+      { href: "/barangay-admin/programs", label: "Programs", icon: Boxes },
+      {
+        href: "/barangay-admin/announcements",
+        label: "Announcements",
+        icon: Megaphone,
+      },
+      { href: "/barangay-admin/import", label: "Import Data", icon: Upload },
     ],
   },
 ];
@@ -83,7 +91,7 @@ export function AdminSidebar({ user }: { user: AuthUser }) {
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
           Barangay Portal
         </p>
-        <p className="text-sm font-semibold leading-tight">BMS Admin</p>
+        <p className="text-sm font-semibold leading-tight">Barangay Admin</p>
       </div>
 
       {/* Nav */}

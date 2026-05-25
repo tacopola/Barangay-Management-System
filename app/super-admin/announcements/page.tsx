@@ -3,7 +3,7 @@ import {
   getBarangays,
 } from "@/db/queries/super-admin/announcement";
 
-import { AnnouncementListClient } from "@/components/super-admin/announcement_tab/announcement-list-client";
+import { AnnouncementListClient } from "@/components/super-admin/announcements/announcement-list-client";
 
 export default async function AnnouncementsPage() {
   const [announcementData, barangayData] = await Promise.all([

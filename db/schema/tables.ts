@@ -24,6 +24,7 @@ import {
   programTypeEnum,
   auditActionEnum,
   financialTypeEnum,
+  departmentTypeEnum,
 } from "./enums";
 
 // ---------------------------------------------------------------------------
@@ -52,6 +53,23 @@ export const barangays = pgTable("barangays", {
   ...timestamps,
 });
 
+export const departments = pgTable(
+  "departments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 150 }).notNull(),
+    type: departmentTypeEnum("type").notNull().unique(),
+    description: text("description"),
+    contactNumber: varchar("contact_number", { length: 20 }),
+    email: varchar("email", { length: 100 }),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
+  },
+  (t) => ({
+    typeIdx: uniqueIndex("departments_type_idx").on(t.type),
+  }),
+);
+
 export const users = pgTable(
   "users",
   {
@@ -71,6 +89,9 @@ export const users = pgTable(
     email: varchar("email", { length: 100 }),
     phoneNumber: varchar("phone_number", { length: 20 }),
     isActive: boolean("is_active").default(true).notNull(),
+    departmentId: uuid("department_id").references(() => departments.id, {
+      onDelete: "set null",
+    }),
     ...timestamps,
   },
   (t) => ({
@@ -474,7 +495,9 @@ export const barangaysRelations = relations(barangays, ({ many }) => ({
   financialRecords: many(financialRecords),
   programs: many(programs),
 }));
-
+export const departmentsRelations = relations(departments, ({ many }) => ({
+  admins: many(users),
+}));
 export const usersRelations = relations(users, ({ one, many }) => ({
   barangay: one(barangays, {
     fields: [users.barangayId],
@@ -483,6 +506,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   resident: one(residents, {
     fields: [users.id],
     references: [residents.userId],
+  }),
+  department: one(departments, {
+    fields: [users.departmentId],
+    references: [departments.id],
   }),
   notifications: many(notifications),
 }));
