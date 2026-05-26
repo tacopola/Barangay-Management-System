@@ -11,9 +11,7 @@ export default async function DepartmentsPage() {
           Super Admin
         </p>
 
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Departments
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Departments</h1>
 
         <p className="text-sm text-muted-foreground mt-1">
           Manage municipal departments and offices.

@@ -4,7 +4,7 @@ import {
   getResidents,
 } from "@/db/queries/barangay-admin/official";
 
-import { OfficialListClient } from "@/components/admin/officials/officials-list-client";
+import { OfficialListClient } from "@/components/barangay-admin/officials/officials-list-client";
 
 export default async function OfficialsPage() {
   const { barangayId } = await requireBarangayAdmin();

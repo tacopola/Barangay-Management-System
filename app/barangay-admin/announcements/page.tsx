@@ -1,6 +1,6 @@
 import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { getAnnouncements } from "@/db/queries/barangay-admin/announcement";
-import { AnnouncementsClient } from "@/components/admin/announcements/announcement-client";
+import { AnnouncementsClient } from "@/components/barangay-admin/announcements/announcement-client";
 
 export default async function AnnouncementsPage() {
   const { barangayId } = await requireBarangayAdmin();

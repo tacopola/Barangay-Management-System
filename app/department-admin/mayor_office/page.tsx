@@ -1,19 +1,15 @@
-import { LogoutButton } from "@/components/auth/logout-admin-button";
-export default function MayorOfficeDashboardPage() {
-  return (
-    <div className="p-6">
-      <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-1">
-        Department Admin
-      </p>
+import { requireDepartmentAdminOf } from "@/lib/auth-helper";
+import { MayorDashboardClient } from "@/components/department-admin/mayor_office/mayor-dashboard-client";
 
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Mayor Office Dashboard
-      </h1>
+export default async function MayorOfficeDashboardPage() {
+  const { admin } = await requireDepartmentAdminOf("mayor_office");
 
-      <p className="text-sm text-muted-foreground mt-1">
-        Manage mayor's office operations, collections, and reports.
-      </p>
-      <LogoutButton />
-    </div>
-  );
+  const stats = {
+    pendingDocuments: 0,
+    todayAppointments: 0,
+    unreadCorrespondence: 0,
+    activeAnnouncements: 0,
+  };
+
+  return <MayorDashboardClient stats={stats} admin={admin} />;
 }

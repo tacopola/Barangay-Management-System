@@ -17,7 +17,7 @@ export type AuthUser = {
   role: UserRole;
   barangayId: string | null;
   departmentId: string | null;
-  departmentType: string | null; // avoids extra DB join in most cases
+  departmentType: string | null; 
   firstName: string;
   lastName: string;
   email: string | null;
@@ -82,7 +82,7 @@ export async function requireAuth(): Promise<AuthUser> {
   const user = await getAuthUser();
   if (!user)
     redirect(
-      "/auth/admin/login?error=You must be logged in to access this page.",
+      "/auth/resident/login?error=You must be logged in to access this page.",
     );
   return user;
 }

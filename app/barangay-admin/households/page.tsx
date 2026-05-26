@@ -4,7 +4,7 @@ import {
   getUnassignedResidents,
 } from "@/db/queries/barangay-admin/household";
 
-import { HouseholdListClient } from "@/components/admin/households/household-list-client";
+import { HouseholdListClient } from "@/components/barangay-admin/households/household-list-client";
 
 export default async function HouseholdsPage() {
   const { barangayId } = await requireBarangayAdmin();

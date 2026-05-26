@@ -10,7 +10,7 @@ import {
 import { eq, and, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { ResidentDetailActions } from "@/components/admin/residents/resident-detail-actions";
+import { ResidentDetailActions } from "@/components/barangay-admin/residents/resident-detail-actions";
 import Link from "next/link";
 
 import {

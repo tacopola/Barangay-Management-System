@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { getBlotterCase } from "@/db/queries/barangay-admin/blotter";
 
-import { BlotterCaseClient } from "@/components/admin/blotters/blotter-case-client";
+import { BlotterCaseClient } from "@/components/barangay-admin/blotters/blotter-case-client";
 
 export default async function BlotterCasePage({
   params,

@@ -5,7 +5,7 @@ import {
   getResidentsList,
 } from "@/db/queries/barangay-admin/document";
 
-import { DocumentQueueClient } from "@/components/admin/documents/document-queue-client";
+import { DocumentQueueClient } from "@/components/barangay-admin/documents/document-queue-client";
 
 export default async function DocumentsPage() {
   const { barangayId } = await requireBarangayAdmin();

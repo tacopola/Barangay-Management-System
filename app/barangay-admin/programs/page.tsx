@@ -1,6 +1,6 @@
 import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { getPrograms } from "@/db/queries/barangay-admin/program";
-import { ProgramsClient } from "@/components/admin/programs/program-client";
+import { ProgramsClient } from "@/components/barangay-admin/programs/program-client";
 
 export default async function ProgramsPage() {
   const { barangayId } = await requireBarangayAdmin();

@@ -6,9 +6,9 @@ import {
   getBarangayName,
 } from "@/db/queries/barangay-admin/dashboard";
 
-import { AdminStatCards } from "@/components/admin/dashboard/admin-stat-cards";
-import { RecentDocRequests } from "@/components/admin/dashboard/recent-doc-requests";
-import { RecentBlotter } from "@/components/admin/dashboard/recent-blotter";
+import { AdminStatCards } from "@/components/barangay-admin/dashboard/admin-stat-cards";
+import { RecentDocRequests } from "@/components/barangay-admin/dashboard/recent-doc-requests";
+import { RecentBlotter } from "@/components/barangay-admin/dashboard/recent-blotter";
 
 export default async function AdminDashboardPage() {
   const { admin, barangayId } = await requireBarangayAdmin();

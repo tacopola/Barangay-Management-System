@@ -4,7 +4,7 @@ import {
   getHouseholds,
 } from "@/db/queries/barangay-admin/resident";
 
-import { ResidentListClient } from "@/components/admin/residents/resident-list-client";
+import { ResidentListClient } from "@/components/barangay-admin/residents/resident-list-client";
 
 export default async function ResidentsPage() {
   const { barangayId } = await requireBarangayAdmin();

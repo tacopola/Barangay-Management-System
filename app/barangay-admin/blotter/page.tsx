@@ -3,7 +3,7 @@ import {
   getBlotterCases,
   getResidentsForBlotter,
 } from "@/db/queries/barangay-admin/blotter";
-import { BlotterListClient } from "@/components/admin/blotters/blotter-list-client";
+import { BlotterListClient } from "@/components/barangay-admin/blotters/blotter-list-client";
 
 export default async function BlotterPage() {
   const { barangayId } = await requireBarangayAdmin();

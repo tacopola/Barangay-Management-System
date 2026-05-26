@@ -1,5 +1,5 @@
 import { requireBarangayAdmin } from "@/lib/auth-helper";
-import { AdminSidebar } from "@/components/admin/dashboard/admin-sidebar";
+import { AdminSidebar } from "@/components/barangay-admin/dashboard/admin-sidebar";
 
 export default async function AdminLayout({
   children,

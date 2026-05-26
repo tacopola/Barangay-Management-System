@@ -4,7 +4,7 @@ import {
   getFinancialSummary,
   getAvailableFiscalYears,
 } from "@/db/queries/barangay-admin/financial";
-import { FinancialsClient } from "@/components/admin/financials/financial-client";
+import { FinancialsClient } from "@/components/barangay-admin/financials/financial-client";
 
 export default async function FinancialsPage({
   searchParams,

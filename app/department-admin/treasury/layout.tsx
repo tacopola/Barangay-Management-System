@@ -1,16 +1,12 @@
 import { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { requireDepartmentAdminOf } from "@/lib/auth-helper";
+import { DeptShell } from "@/components/department-admin/shell/dept-shell";
 
 export default async function TreasuryLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  try {
-    await requireDepartmentAdminOf("treasury");
-    return children;
-  } catch {
-    redirect("/department-admin");
-  }
+  await requireDepartmentAdminOf("treasury");
+  return <DeptShell deptType="treasury">{children}</DeptShell>;
 }

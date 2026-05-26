@@ -1,6 +1,6 @@
 import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { getProgramWithBeneficiaries } from "@/db/queries/barangay-admin/program";
-import { ProgramDetailClient } from "@/components/admin/programs/program-detail-client";
+import { ProgramDetailClient } from "@/components/barangay-admin/programs/program-detail-client";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";

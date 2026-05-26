@@ -1,4 +1,7 @@
-import { getSuperAdminStats, getAllBarangays } from "@/db/queries/super-admin/dashboard";
+import {
+  getSuperAdminStats,
+  getAllBarangays,
+} from "@/db/queries/super-admin/dashboard";
 import { BarangayTable } from "@/components/super-admin/dashboard/barangay-table";
 
 export default async function SuperAdminPage() {

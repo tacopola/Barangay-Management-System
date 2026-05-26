@@ -1,7 +1,7 @@
 import { requireBarangayAdmin } from "@/lib/auth-helper";
 import { getBlotterCase } from "@/db/queries/barangay-admin/blotter";
 import { notFound } from "next/navigation";
-import { BlotterCaseClient } from "@/components/admin/blotters/blotter-case-client";
+import { BlotterCaseClient } from "@/components/barangay-admin/blotters/blotter-case-client";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
